@@ -1,0 +1,33 @@
+# Git 相关
+.git
+.gitignore
+.gitattributes
+
+# IDE 相关
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# Maven 目标目录
+target/
+
+# 文档和说明
+README.md
+DEPLOYMENT.md
+*.md
+
+# GitHub Actions
+.github/
+
+# 日志文件
+*.log
+
+# 临时文件
+*.tmp
+*.temp 
