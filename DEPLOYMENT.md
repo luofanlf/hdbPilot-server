@@ -61,6 +61,8 @@ ssh-copy-id -i ~/.ssh/ec2-hdbpilot.pub ubuntu@YOUR_EC2_IP
 ### Docker Hub 设置
 - `DOCKER_USERNAME`: 您的 Docker Hub 用户名
 - `DOCKER_PASSWORD`: 您的 Docker Hub 密码或访问令牌
+docker login -u luofan036
+dckr_pat_ajwLTIMiVM697AiiXd2WTZ_y-WI
 
 ### EC2 设置
 - `EC2_HOST`: EC2 实例的公网 IP
