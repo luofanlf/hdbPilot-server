@@ -1,5 +1,5 @@
 # 多阶段构建
-FROM openjdk:21-jdk-slim as builder
+FROM eclipse-temurin:21-jdk AS builder
 
 # 设置工作目录
 WORKDIR /app
@@ -19,7 +19,7 @@ COPY src ./src
 RUN ./mvnw clean package -DskipTests
 
 # 运行阶段
-FROM openjdk:21-jre-slim
+FROM eclipse-temurin:21-jre
 
 # 设置工作目录
 WORKDIR /app
