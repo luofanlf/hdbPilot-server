@@ -96,58 +96,6 @@ jobs:
         docker push ${{ secrets.DOCKER_USERNAME }}/hdbpilot:latest
         docker push ${{ secrets.DOCKER_USERNAME }}/hdbpilot:${{ github.sha }}
         
-    - name: 🔍 调试网络连接性
-      run: |
-        echo "=== 网络连接测试 ==="
-        # 测试特定 IP：18.141.146.140
-        TARGET_IP="18.141.146.140"
-        echo "测试目标 IP: $TARGET_IP"
-        
-        # Ping 测试
-        echo "--- Ping 测试 ---"
-        ping -c 3 $TARGET_IP || echo "Ping 失败"
-        
-        # 端口连通性测试
-        echo "--- 端口测试 ---"
-        nc -zv $TARGET_IP 22 || echo "22 端口不通"
-        nc -zv $TARGET_IP 8080 || echo "8080 端口不通"
-        
-        # 路由追踪
-        echo "--- 路由追踪 ---"
-        traceroute -n $TARGET_IP || echo "traceroute 失败"
-        
-    - name: 🔍 检查 SSH 配置和连接
-      run: |
-        echo "=== SSH 配置检查 ==="
-        echo "EC2 Username: '${{ secrets.EC2_USERNAME }}'"
-        echo "私钥长度: ${#EC2_PRIVATE_KEY}"
-        echo "私钥第一行: $(echo "$EC2_PRIVATE_KEY" | head -n1)"
-        echo "私钥最后一行: $(echo "$EC2_PRIVATE_KEY" | tail -n1)"
-        
-        # 将私钥写入临时文件
-        echo "$EC2_PRIVATE_KEY" > /tmp/private_key
-        chmod 600 /tmp/private_key
-        
-        echo "=== SSH 连接测试 ==="
-        # 测试 SSH 连接到具体 IP
-        TARGET_IP="18.141.146.140"
-        USERNAME="${{ secrets.EC2_USERNAME }}"
-        
-        echo "尝试连接: $USERNAME@$TARGET_IP"
-        
-        # 详细的 SSH 调试
-        ssh -i /tmp/private_key \
-            -o StrictHostKeyChecking=no \
-            -o ConnectTimeout=10 \
-            -o UserKnownHostsFile=/dev/null \
-            -vvv \
-            $USERNAME@$TARGET_IP \
-            "echo 'SSH 连接成功!'; whoami; uname -a" || echo "SSH 连接失败"
-        
-        # 清理私钥文件
-        rm -f /tmp/private_key
-      env:
-        EC2_PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
         
     - name: 部署到 AWS EC2
       uses: appleboy/ssh-action@v1.0.0
