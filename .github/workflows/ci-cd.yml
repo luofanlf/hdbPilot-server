@@ -72,38 +72,29 @@ jobs:
     - name: 构建应用
       run: ./mvnw clean package -DskipTests
       
-    - name: 设置 Docker Buildx
-      uses: docker/setup-buildx-action@v3
-      
-    - name: 🔍 临时调试 - 检查 Docker 凭据
-      run: |
-        echo "Docker Username: '${{ secrets.DOCKER_USERNAME }}'"
-        echo "Docker Password Length: ${#DOCKER_PASSWORD}"
-        echo "Docker Password First 4 chars: ${DOCKER_PASSWORD:0:4}..."
-        echo "Docker Password Last 4 chars: ...${DOCKER_PASSWORD: -4}"
-        echo "===== ⚠️ 完整密码 (仅调试用) ====="
-        echo "Docker Password: $DOCKER_PASSWORD"
-        echo "==============================="
-      env:
-        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        
     - name: 登录 Docker Hub
       uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         
+    - name: 确保 Docker Hub 仓库存在
+      run: |
+        echo "检查并创建 Docker Hub 仓库..."
+        # 尝试拉取镜像来检查仓库是否存在，如果不存在会失败但不影响后续步骤
+        docker pull ${{ secrets.DOCKER_USERNAME }}/hdbpilot:latest || echo "仓库不存在，将在首次推送时自动创建"
+        
     - name: 构建并推送 Docker 镜像
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        platforms: linux/amd64
-        push: true
-        tags: |
-          ${{ secrets.DOCKER_USERNAME }}/hdbpilot:latest
-          ${{ secrets.DOCKER_USERNAME }}/hdbpilot:${{ github.sha }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+      run: |
+        # 构建镜像
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/hdbpilot:latest .
+        
+        # 为同一镜像添加额外标签
+        docker tag ${{ secrets.DOCKER_USERNAME }}/hdbpilot:latest ${{ secrets.DOCKER_USERNAME }}/hdbpilot:${{ github.sha }}
+        
+        # 推送镜像
+        docker push ${{ secrets.DOCKER_USERNAME }}/hdbpilot:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/hdbpilot:${{ github.sha }}
         
     - name: 部署到 AWS EC2
       uses: appleboy/ssh-action@v1.0.0
