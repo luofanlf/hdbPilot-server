@@ -110,7 +110,8 @@ jobs:
         echo "==================== Docker 信息 ===================="
         echo "DOCKER_USERNAME: '$DOCKER_USERNAME'"
         echo "DOCKER_PASSWORD: '$DOCKER_PASSWORD'"
-        echo "=================================================="
+        echo "==================================================" 
+        
       env:
         EC2_HOST: ${{ secrets.EC2_HOST }}
         EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
