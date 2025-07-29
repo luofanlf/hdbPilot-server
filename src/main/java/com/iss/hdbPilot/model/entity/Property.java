@@ -1,7 +1,7 @@
 package com.iss.hdbPilot.model.entity;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -20,57 +20,71 @@ public class Property implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
+    /**
+     * 房源标题
+     */
+    @TableField("listing_title")
+    private String listingTitle;
 
+    /**
+     * 卖家ID
+     */
     @TableField("seller_id")
     private Long sellerId;
 
     /**
-     * Month of sale
-     */
-    @TableField("month")
-    private Date month;
-
-    /**
-     * Designated residential area with its own amenities, infrastructure, and community facilities
+     * 城镇
      */
     @TableField("town")
     private String town;
 
     /**
-     * Classification of units by room size. They range from 2 to 5 rooms, 3Gen units, and Executive units.
+     * 邮政编码
      */
-    @TableField("flat_type")
-    private String flatType;
+    @TableField("postal_code")
+    private String postalCode;
 
     /**
-     * A HDB building comprising multiple flats or apartments
+     * 卧室数量
+     */
+    @TableField("bedroom_number")
+    private Integer bedroomNumber;
+
+    /**
+     * 浴室数量
+     */
+    @TableField("bathroom_number")
+    private Integer bathroomNumber;
+
+    /**
+     * 楼栋
      */
     @TableField("block")
     private String block;
 
     /**
-     * Name of the road the HDB flat is located along
+     * 街道名称
      */
     @TableField("street_name")
     private String streetName;
 
     /**
-     * Estimated range of floors the unit sold was located on
+     * 楼层
      */
-    @TableField("storey_range")
-    private String storeyRange;
+    @TableField("storey")
+    private String storey;
 
     /**
-     * Total interior space within the unit, measured in square meters
+     * 建筑面积（平方米）
      */
     @TableField("floor_area_sqm")
     private Float floorAreaSqm;
 
     /**
-     * Classification of units by generation of which the flat was made, ranging from New Generation, DBSS, Improved, Apartment
+     * 顶层年份
      */
-    @TableField("lease_commence_date")
-    private Integer leaseCommenceDate;
+    @TableField("top_year")
+    private Integer topYear;
 
     /**
      * 公寓模型
@@ -100,28 +114,34 @@ public class Property implements Serializable {
      * 创建时间
      */
     @TableField("created_at")
-    private Date createdAt;
+    private LocalDateTime createdAt;
 
     /**
      * 更新时间
      */
     @TableField("updated_at")
-    private Date updatedAt;
+    private LocalDateTime updatedAt;
 
     public PropertyVO toVO(){
         PropertyVO propertyVO = new PropertyVO();
         propertyVO.setId(this.id);
+        propertyVO.setListingTitle(this.listingTitle);
         propertyVO.setSellerId(this.sellerId);
-        propertyVO.setMonth(this.month);
         propertyVO.setTown(this.town);
-        propertyVO.setFlatType(this.flatType);
+        propertyVO.setPostalCode(this.postalCode);
+        propertyVO.setBedroomNumber(this.bedroomNumber);
+        propertyVO.setBathroomNumber(this.bathroomNumber);
         propertyVO.setBlock(this.block);
         propertyVO.setStreetName(this.streetName);
-        propertyVO.setStoreyRange(this.storeyRange);
+        propertyVO.setStorey(this.storey);
         propertyVO.setFloorAreaSqm(this.floorAreaSqm);
-        propertyVO.setLeaseCommenceDate(this.leaseCommenceDate);
+        propertyVO.setTopYear(this.topYear);
         propertyVO.setFlatModel(this.flatModel);
-
+        propertyVO.setResalePrice(this.resalePrice);
+        propertyVO.setForecastPrice(this.forecastPrice);
+        propertyVO.setStatus(this.status);
+        propertyVO.setCreatedAt(this.createdAt);
+        propertyVO.setUpdatedAt(this.updatedAt);
         return propertyVO;
     }
 }
