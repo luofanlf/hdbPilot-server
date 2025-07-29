@@ -7,6 +7,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.iss.hdbPilot.model.vo.PropertyVO;
+
 import lombok.Data;
 
 @Data
@@ -15,71 +17,60 @@ public class Property implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * 主键ID
-     */
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    /**
-     * 卖家ID
-     */
+
     @TableField("seller_id")
-    private Integer sellerId;
+    private Long sellerId;
 
     /**
-     * 月份
+     * Month of sale
      */
     @TableField("month")
     private Date month;
 
     /**
-     * 城镇
+     * Designated residential area with its own amenities, infrastructure, and community facilities
      */
     @TableField("town")
     private String town;
 
     /**
-     * 公寓类型
+     * Classification of units by room size. They range from 2 to 5 rooms, 3Gen units, and Executive units.
      */
     @TableField("flat_type")
     private String flatType;
 
     /**
-     * 座号
+     * A HDB building comprising multiple flats or apartments
      */
     @TableField("block")
     private String block;
 
     /**
-     * 街道名称
+     * Name of the road the HDB flat is located along
      */
     @TableField("street_name")
     private String streetName;
 
     /**
-     * 楼层范围
+     * Estimated range of floors the unit sold was located on
      */
     @TableField("storey_range")
     private String storeyRange;
 
     /**
-     * 建筑面积（平方米）
+     * Total interior space within the unit, measured in square meters
      */
     @TableField("floor_area_sqm")
     private Float floorAreaSqm;
 
     /**
-     * 租约开始日期
+     * Classification of units by generation of which the flat was made, ranging from New Generation, DBSS, Improved, Apartment
      */
     @TableField("lease_commence_date")
     private Integer leaseCommenceDate;
-
-    /**
-     * 剩余租期
-     */
-    @TableField("remaining_lease")
-    private String remainingLease;
 
     /**
      * 公寓模型
@@ -117,5 +108,21 @@ public class Property implements Serializable {
     @TableField("updated_at")
     private Date updatedAt;
 
+    public PropertyVO toVO(){
+        PropertyVO propertyVO = new PropertyVO();
+        propertyVO.setId(this.id);
+        propertyVO.setSellerId(this.sellerId);
+        propertyVO.setMonth(this.month);
+        propertyVO.setTown(this.town);
+        propertyVO.setFlatType(this.flatType);
+        propertyVO.setBlock(this.block);
+        propertyVO.setStreetName(this.streetName);
+        propertyVO.setStoreyRange(this.storeyRange);
+        propertyVO.setFloorAreaSqm(this.floorAreaSqm);
+        propertyVO.setLeaseCommenceDate(this.leaseCommenceDate);
+        propertyVO.setFlatModel(this.flatModel);
+
+        return propertyVO;
+    }
 }
 

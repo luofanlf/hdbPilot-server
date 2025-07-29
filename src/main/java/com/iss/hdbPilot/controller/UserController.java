@@ -3,7 +3,6 @@ package com.iss.hdbPilot.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import com.iss.hdbPilot.common.BaseResponse;
 import com.iss.hdbPilot.common.ResultUtils;
 import com.iss.hdbPilot.model.dto.UserLoginRequest;
@@ -43,6 +42,7 @@ public class UserController {
         return ResultUtils.success(userService.register(username,password,confirmPassword));
     }
 
+    
     @PostMapping("/logout")
     public BaseResponse<Boolean> logout(HttpServletRequest request){
         request.getSession().removeAttribute("user");
