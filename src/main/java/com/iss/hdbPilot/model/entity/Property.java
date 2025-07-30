@@ -138,7 +138,7 @@ public class Property implements Serializable {
         propertyVO.setTopYear(this.topYear);
         propertyVO.setFlatModel(this.flatModel);
         propertyVO.setResalePrice(this.resalePrice);
-        propertyVO.setavatarUrl(this.avatarUrl);
+        propertyVO.setAvatarUrl(this.avatarUrl);
         propertyVO.setStatus(this.status);
         propertyVO.setCreatedAt(this.createdAt);
         propertyVO.setUpdatedAt(this.updatedAt);
