@@ -45,6 +45,32 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    public Long adminLogin(String username,String password,HttpServletRequest request){
+        //校验参数
+        if(username == null || password == null){
+            throw new RuntimeException("Username and password cannot be null");
+        }
+        //查询用户是否存在
+        String encryptedPassword = this.getEncryptedPassword(password);
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("username",username);
+        queryWrapper.eq("password_hash",encryptedPassword);
+        User user = userMapper.selectOne(queryWrapper);
+        if(user == null){
+            throw new RuntimeException("username or password is incorrect");
+        }
+        if(user.getUserRole() != "admin"){
+            throw new RuntimeException("user is not admin");
+        }
+        //存储用户登陆态
+        request.getSession().setAttribute("user",user);
+
+        //返回用户id
+        return user.getId();
+        
+    }
+
+    @Override
     public Long register(String username,String password,String confirmPassword){
     
         //校验注册参数

@@ -9,8 +9,25 @@ import com.iss.hdbPilot.model.vo.UserVO;
 public interface UserService {
     
 
+    /**
+     * 用户登录
+     * @param username
+     * @param password
+     * @param request
+     * @return
+     */
     Long login(String username,String password,HttpServletRequest request);
 
+
+    /**
+     * 管理员登录
+     * @param username
+     * @param password
+     * @param request
+     * @return
+     */
+    Long adminLogin(String username,String password,HttpServletRequest request);
+    
     /**
      * 用户注册
      * @param username

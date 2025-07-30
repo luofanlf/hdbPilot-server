@@ -5,11 +5,13 @@ import com.iss.hdbPilot.annotation.AuthCheck;
 import com.iss.hdbPilot.common.BaseResponse;
 import com.iss.hdbPilot.common.ResultUtils;
 import com.iss.hdbPilot.model.dto.PageRequest;
+import com.iss.hdbPilot.model.dto.UserLoginRequest;
 import com.iss.hdbPilot.model.vo.UserVO;
 import com.iss.hdbPilot.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/admin/user")
@@ -46,6 +48,16 @@ public class AdminUserController {
         } else {
             return new BaseResponse<>(-1, false, "Failed to delete user. User may not exist or database error occurred.");
         }
+    }
+
+    @PostMapping("/login")
+    public BaseResponse<Long> login(@RequestBody UserLoginRequest loginRequest, HttpServletRequest request) {
+        if(loginRequest == null){
+            throw new RuntimeException("Request body is null");
+        }
+        String username = loginRequest.getUsername();
+        String password = loginRequest.getPassword();
+        return ResultUtils.success(userService.adminLogin(username,password,request));
     }
 
 }
