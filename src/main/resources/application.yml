@@ -7,10 +7,6 @@ spring:
     username: root
     password: rootpassword
     driver-class-name: com.mysql.cj.jdbc.Driver
-  sql:
-    init:
-      mode: always
-      schema-locations: classpath:sql/scheme.sql
 
 mybatis-plus:
   mapper-locations: classpath:/mapper/*.xml
