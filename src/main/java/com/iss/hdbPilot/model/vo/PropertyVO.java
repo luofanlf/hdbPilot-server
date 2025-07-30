@@ -74,9 +74,9 @@ public class PropertyVO {
     private Float resalePrice;
 
     /**
-     * 预测价格
+     * 图片路径
      */
-    private Float forecastPrice;
+    private String avatarUrl;
 
     /**
      * 状态

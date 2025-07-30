@@ -2,7 +2,9 @@ package com.iss.hdbPilot.service;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.iss.hdbPilot.model.entity.User;
+import com.iss.hdbPilot.model.vo.UserVO;
 
 public interface UserService {
     
@@ -11,7 +13,9 @@ public interface UserService {
 
     /**
      * 用户注册
-     * @param userRegisterRequest
+     * @param username
+     * @param password
+     * @param confirmPassword
      * @return
      */
     Long register(String username,String password,String confirmPassword);
@@ -29,4 +33,21 @@ public interface UserService {
      * @return
      */
     User getCurrentUser(HttpServletRequest request);
+
+    /**
+     * Retrieves a paginated list of non-admin users (where user_role != 'admin').
+     *
+     * @param current the current page number (starting from 1)
+     * @param size the number of users per page
+     * @return a page of UserVO objects representing the users
+     */
+    Page<UserVO> listUsersByPage(long current, long size);
+
+    /**
+     * Deletes a user by their ID. Typically used by an administrator.
+     *
+     * @param userId the ID of the user to delete
+     * @return true if the user was successfully deleted, false otherwise
+     */
+    boolean removeUserById(Long userId);
 }

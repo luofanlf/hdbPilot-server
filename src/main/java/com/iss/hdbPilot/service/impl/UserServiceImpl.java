@@ -1,14 +1,19 @@
 package com.iss.hdbPilot.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.iss.hdbPilot.mapper.UserMapper;
 import com.iss.hdbPilot.model.entity.User;
+import com.iss.hdbPilot.model.vo.UserVO;
 import com.iss.hdbPilot.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -93,5 +98,35 @@ public class UserServiceImpl implements UserService{
     public String getEncryptedPassword(String password){
         final String SALT = "luofan";
         return DigestUtils.md5DigestAsHex((SALT + password).getBytes());
+    }
+
+
+    @Override
+    public Page<UserVO> listUsersByPage(long current, long size) {
+        Page<User> page = new Page<>(current, size);
+
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.ne("user_role", "admin");
+
+        Page<User> userPage = userMapper.selectPage(page, queryWrapper);
+
+        Page<UserVO> userVOPage = new Page<>();
+        userVOPage.setCurrent(current);
+        userVOPage.setSize(size);
+        userVOPage.setTotal(userPage.getTotal());
+
+        List<UserVO> voList = userPage.getRecords().stream()
+                .map(User::toVO)
+                .collect(Collectors.toList());
+        userVOPage.setRecords(voList);
+        return userVOPage;
+    }
+
+    @Override
+    public boolean removeUserById(Long userId) {
+        if (userId == null || userId <= 0) {
+            throw new IllegalArgumentException("User ID is illegal");
+        }
+        return userMapper.deleteById(userId) > 0;
     }
 }

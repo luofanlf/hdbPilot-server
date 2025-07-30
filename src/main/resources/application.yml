@@ -5,8 +5,12 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/hdbPilot?useSSL=false&serverTimezone=UTC
     username: root
-    password: rootpassword
+    password: 021129@mjl
     driver-class-name: com.mysql.cj.jdbc.Driver
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:sql/scheme.sql
 
 mybatis-plus:
   mapper-locations: classpath:/mapper/*.xml
