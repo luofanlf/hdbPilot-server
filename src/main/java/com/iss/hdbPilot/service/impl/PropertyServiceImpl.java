@@ -33,6 +33,14 @@ public class PropertyServiceImpl implements PropertyService{
         return property != null ? property.toVO() : null;
     }
     
+    @Override
+    public List<PropertyVO> getUserProperties(Long sellerId) {
+        QueryWrapper<Property> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("seller_id", sellerId);
+        List<Property> properties = propertyMapper.selectList(queryWrapper);
+        return properties.stream().map(Property::toVO).collect(Collectors.toList());
+    }
+    
     
     @Override
     public PropertyVO create(PropertyRequest request) {

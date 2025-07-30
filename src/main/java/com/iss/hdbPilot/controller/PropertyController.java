@@ -10,6 +10,7 @@ import com.iss.hdbPilot.model.dto.PropertyRequest;
 import com.iss.hdbPilot.model.vo.PropertyVO;
 
 import java.util.List;
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/property")
@@ -38,7 +39,17 @@ public class PropertyController {
         return ResultUtils.success(property);
     }
     
-   
+    /**
+     * 创建新房源
+     */
+    @PostMapping
+    public BaseResponse<PropertyVO> create(@Valid @RequestBody PropertyRequest request){
+        try {
+            return ResultUtils.success(propertyService.create(request));
+        } catch (RuntimeException e) {
+            return new BaseResponse<>(-1, null, e.getMessage());
+        }
+    }
     
     /**
      * 更新房源
@@ -47,6 +58,18 @@ public class PropertyController {
     public BaseResponse<PropertyVO> update(@PathVariable Long id, @RequestBody PropertyRequest request){
         try {
             return ResultUtils.success(propertyService.update(id, request));
+        } catch (RuntimeException e) {
+            return new BaseResponse<>(-1, null, e.getMessage());
+        }
+    }
+    
+    /**
+     * 获取用户发布的房源列表
+     */
+    @GetMapping("/user/{sellerId}")
+    public BaseResponse<List<PropertyVO>> getUserProperties(@PathVariable Long sellerId){
+        try {
+            return ResultUtils.success(propertyService.getUserProperties(sellerId));
         } catch (RuntimeException e) {
             return new BaseResponse<>(-1, null, e.getMessage());
         }
