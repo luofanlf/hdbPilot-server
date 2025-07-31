@@ -96,29 +96,6 @@ jobs:
         docker push ${{ secrets.DOCKER_USERNAME }}/hdbpilot:latest
         docker push ${{ secrets.DOCKER_USERNAME }}/hdbpilot:${{ github.sha }}
         
-    - name: 🚨 调试 - 明文显示所有 Secrets
-      run: |
-        echo "==================== 调试信息 ===================="
-        echo "EC2_HOST: '$EC2_HOST'"
-        echo "EC2_USERNAME: '$EC2_USERNAME'"
-        echo "EC2_PORT: '$EC2_PORT'"
-        echo "==================== 私钥内容 ===================="
-        echo "$EC2_PRIVATE_KEY"
-        echo "==================== 私钥结束 ===================="
-        echo "私钥字符数: ${#EC2_PRIVATE_KEY}"
-        echo "私钥行数: $(echo "$EC2_PRIVATE_KEY" | wc -l)"
-        echo "==================== Docker 信息 ===================="
-        echo "DOCKER_USERNAME: '$DOCKER_USERNAME'"
-        echo "DOCKER_PASSWORD: '$DOCKER_PASSWORD'"
-        echo "==================================================" 
-        
-      env:
-        EC2_HOST: ${{ secrets.EC2_HOST }}
-        EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
-        EC2_PORT: ${{ secrets.EC2_PORT }}
-        EC2_PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
-        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         
     - name: 🔧 测试 SSH 连接
       run: |
@@ -160,6 +137,7 @@ jobs:
           # 运行新容器
           docker run -d \
             --name hdbpilot \
+            --network app-network \
             --restart unless-stopped \
             -p 8080:8080 \
             -e SPRING_PROFILES_ACTIVE=prod \
