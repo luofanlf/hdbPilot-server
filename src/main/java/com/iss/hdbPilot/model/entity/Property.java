@@ -2,6 +2,7 @@ package com.iss.hdbPilot.model.entity;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -99,10 +100,10 @@ public class Property implements Serializable {
     private Float resalePrice;
 
     /**
-     * 图片路径
+     * 房屋图片
      */
-    @TableField("avatar_url")
-    private String avatarUrl;
+    @TableField(exist = false)
+    private List<PropertyImage> imageList;
 
     /**
      * 状态
@@ -138,7 +139,7 @@ public class Property implements Serializable {
         propertyVO.setTopYear(this.topYear);
         propertyVO.setFlatModel(this.flatModel);
         propertyVO.setResalePrice(this.resalePrice);
-        propertyVO.setAvatarUrl(this.avatarUrl);
+        propertyVO.setImageList(this.imageList);
         propertyVO.setStatus(this.status);
         propertyVO.setCreatedAt(this.createdAt);
         propertyVO.setUpdatedAt(this.updatedAt);

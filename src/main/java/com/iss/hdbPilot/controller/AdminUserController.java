@@ -1,7 +1,6 @@
 package com.iss.hdbPilot.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.iss.hdbPilot.annotation.AuthCheck;
 import com.iss.hdbPilot.common.BaseResponse;
 import com.iss.hdbPilot.common.ResultUtils;
 import com.iss.hdbPilot.model.dto.PageRequest;

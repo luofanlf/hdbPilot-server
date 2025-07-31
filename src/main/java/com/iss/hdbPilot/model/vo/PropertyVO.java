@@ -1,6 +1,9 @@
 package com.iss.hdbPilot.model.vo;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
+import com.iss.hdbPilot.model.entity.PropertyImage;
 
 import lombok.Data;
 
@@ -74,9 +77,9 @@ public class PropertyVO {
     private Float resalePrice;
 
     /**
-     * 图片路径
+     * 房屋图片
      */
-    private String avatarUrl;
+    private List<PropertyImage> imageList;
 
     /**
      * 状态
