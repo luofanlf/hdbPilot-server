@@ -1,0 +1,6 @@
+spring:
+  datasource:
+    url: jdbc:mysql://mysql-hdbpilot:3306/hdbPilot?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: rootpassword 
+    driver-class-name: com.mysql.cj.jdbc.Driver
