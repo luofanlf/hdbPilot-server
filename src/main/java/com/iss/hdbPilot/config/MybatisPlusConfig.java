@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 
 @Configuration
-@MapperScan("com.luofan.flashjudge.mapper")
+@MapperScan("com.iss.hdbPilot.mapper")
 public class MybatisPlusConfig {
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {

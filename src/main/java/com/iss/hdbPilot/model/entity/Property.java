@@ -99,10 +99,10 @@ public class Property implements Serializable {
     private Float resalePrice;
 
     /**
-     * 预测价格
+     * 图片路径
      */
-    @TableField("forecast_price")
-    private Float forecastPrice;
+    @TableField("avatar_url")
+    private String avatarUrl;
 
     /**
      * 状态
@@ -138,7 +138,7 @@ public class Property implements Serializable {
         propertyVO.setTopYear(this.topYear);
         propertyVO.setFlatModel(this.flatModel);
         propertyVO.setResalePrice(this.resalePrice);
-        propertyVO.setForecastPrice(this.forecastPrice);
+        propertyVO.setAvatarUrl(this.avatarUrl);
         propertyVO.setStatus(this.status);
         propertyVO.setCreatedAt(this.createdAt);
         propertyVO.setUpdatedAt(this.updatedAt);
