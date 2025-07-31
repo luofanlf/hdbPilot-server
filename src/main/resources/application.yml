@@ -7,14 +7,12 @@ spring:
     username: root
     password: rootpassword
     driver-class-name: com.mysql.cj.jdbc.Driver
+  # Profiles 配置：指定默认激活的环境为 dev (开发环境)
+  profiles:
+    active: dev
 
 mybatis-plus:
   mapper-locations: classpath:/mapper/*.xml
   type-aliases-package: com.iss.hdbPilot.model.entity
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-
-spring:
-  # Profiles 配置：指定默认激活的环境为 dev (开发环境)
-  profiles:
-    active: dev
