@@ -1,0 +1,12 @@
+package com.iss.hdbPilot.model.entity;
+
+import lombok.Data;
+import java.time.LocalDateTime;
+
+@Data
+public class Comment {
+    private Long id;                  // Primary key
+    private Integer rating;           // Score
+    private String content;           // Comment text
+    private LocalDateTime createdAt;  // Time of creation
+}
