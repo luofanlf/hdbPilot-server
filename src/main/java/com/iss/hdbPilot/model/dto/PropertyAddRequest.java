@@ -4,7 +4,7 @@ import lombok.Data;
 import javax.validation.constraints.*;
 
 @Data
-public class PropertyRequest {
+public class PropertyAddRequest {
     /**
      * 房源标题
      */

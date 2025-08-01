@@ -3,10 +3,13 @@ package com.iss.hdbPilot.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.iss.hdbPilot.common.BaseResponse;
 import com.iss.hdbPilot.common.ResultUtils;
 import com.iss.hdbPilot.service.PropertyService;
-import com.iss.hdbPilot.model.dto.PropertyRequest;
+import com.iss.hdbPilot.model.dto.PageRequest;
+import com.iss.hdbPilot.model.dto.PropertyAddRequest;
+import com.iss.hdbPilot.model.dto.PropertyQueryRequest;
 import com.iss.hdbPilot.model.vo.PropertyVO;
 
 import java.util.List;
@@ -23,8 +26,8 @@ public class PropertyController {
      * 获取所有房源列表
      */
     @GetMapping("/list")
-    public BaseResponse<List<PropertyVO>> list(){
-        return ResultUtils.success(propertyService.list());
+    public BaseResponse<Page<PropertyVO>> list(PropertyQueryRequest pageRequest){
+        return ResultUtils.success(propertyService.list(pageRequest));
     }
     
     /**
@@ -43,7 +46,7 @@ public class PropertyController {
      * 创建新房源
      */
     @PostMapping
-    public BaseResponse<PropertyVO> create(@Valid @RequestBody PropertyRequest request){
+    public BaseResponse<PropertyVO> create(@Valid @RequestBody PropertyAddRequest request){
         try {
             return ResultUtils.success(propertyService.create(request));
         } catch (RuntimeException e) {
@@ -55,7 +58,7 @@ public class PropertyController {
      * 更新房源
      */
     @PutMapping("/{id}")
-    public BaseResponse<PropertyVO> update(@PathVariable Long id, @RequestBody PropertyRequest request){
+    public BaseResponse<PropertyVO> update(@PathVariable Long id, @RequestBody PropertyAddRequest request){
         try {
             return ResultUtils.success(propertyService.update(id, request));
         } catch (RuntimeException e) {

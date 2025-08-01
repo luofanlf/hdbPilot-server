@@ -2,14 +2,17 @@ package com.iss.hdbPilot.service;
 
 import java.util.List;
 
-import com.iss.hdbPilot.model.dto.PropertyRequest;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.iss.hdbPilot.model.dto.PageRequest;
+import com.iss.hdbPilot.model.dto.PropertyAddRequest;
+import com.iss.hdbPilot.model.dto.PropertyQueryRequest;
 import com.iss.hdbPilot.model.vo.PropertyVO;
 
 public interface PropertyService {
     /**
      * 获取所有房源列表
      */
-    List<PropertyVO> list();
+    Page<PropertyVO> list(PropertyQueryRequest pageRequest);
     
     /**
      * 根据ID获取房源详情
@@ -26,12 +29,12 @@ public interface PropertyService {
     /**
      * 创建房源
      */
-    PropertyVO create(PropertyRequest request);
+    PropertyVO create(PropertyAddRequest request);
     
     /**
      * 更新房源
      */
-    PropertyVO update(Long id, PropertyRequest request);
+    PropertyVO update(Long id, PropertyAddRequest request);
     
     /**
      * 删除房源
