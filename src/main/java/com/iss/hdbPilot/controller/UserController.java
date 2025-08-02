@@ -58,6 +58,17 @@ public class UserController {
         return ResultUtils.success(userVO);
     }
 
+    @GetMapping("/profile")
+    public BaseResponse<UserVO> getUserProfile(HttpServletRequest request) {
+        User currentUser = userService.getCurrentUser(request);
+        if (currentUser == null) {
+            // 如果会话中没有用户，返回未登录错误
+            return ResultUtils.error(401, "User not logged in");
+        }
+        // 将 User 实体转换为 UserVO，然后返回
+        return ResultUtils.success(currentUser.toVO());
+    }
+
     // ======================== 新增的用户自我管理方法 ========================
     /**
      * 允许用户修改自己的信息（用户名、密码、邮箱、昵称、个人简介）
@@ -65,6 +76,7 @@ public class UserController {
      * @param request HTTP请求，用于获取当前用户
      * @return 更新结果
      */
+
     @PostMapping("/update_profile")
     public BaseResponse<Boolean> updateUserProfile(@RequestBody UserUpdateRequest updateRequest, HttpServletRequest request) {
         // 获取当前登录的用户
