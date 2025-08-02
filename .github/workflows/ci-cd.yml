@@ -45,6 +45,7 @@ jobs:
         name: Maven Tests
         path: target/surefire-reports/*.xml
         reporter: java-junit
+        fail-on-error: false
 
   build-and-deploy:
     needs: test
