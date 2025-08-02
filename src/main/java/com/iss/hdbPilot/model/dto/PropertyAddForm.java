@@ -10,6 +10,7 @@ import javax.validation.constraints.Size;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.Data;
+import java.util.List;
 
 @Data
 public class PropertyAddForm {
@@ -114,7 +115,6 @@ public class PropertyAddForm {
      */
     private Float forecastPrice;
 
-
     /**
      * 状态
      */
@@ -123,7 +123,7 @@ public class PropertyAddForm {
     private String status;
 
     /**
-     * 图片文件
+     * 图片文件列表（支持多张图片）
      */
-    private MultipartFile imageFile;
+    private List<MultipartFile> imageFiles;
 }

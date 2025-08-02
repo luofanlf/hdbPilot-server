@@ -13,6 +13,7 @@ import com.iss.hdbPilot.model.dto.PropertyAddForm;
 import com.iss.hdbPilot.model.dto.PropertyAddRequest;
 import com.iss.hdbPilot.model.dto.PropertyQueryRequest;
 import com.iss.hdbPilot.model.vo.PropertyVO;
+import com.iss.hdbPilot.model.vo.PropertyImageVO;
 
 import java.util.List;
 import javax.validation.Valid;
@@ -33,6 +34,14 @@ public class PropertyController {
     }
     
     /**
+     * 获取所有房源列表（不分页，用于地图显示）
+     */
+    @GetMapping("/list/all")
+    public BaseResponse<List<PropertyVO>> listAll(){
+        return ResultUtils.success(propertyService.listAll());
+    }
+    
+    /**
      * 根据ID获取房源详情
      */
     @GetMapping("/{id}")
@@ -49,7 +58,7 @@ public class PropertyController {
      */
     @PostMapping
     public BaseResponse<PropertyVO> create(@ModelAttribute PropertyAddForm form){
-            return ResultUtils.success(propertyService.create(form));
+        return ResultUtils.success(propertyService.create(form));
     }
     
     /**
@@ -57,11 +66,7 @@ public class PropertyController {
      */
     @PutMapping("/{id}")
     public BaseResponse<PropertyVO> update(@PathVariable Long id, @RequestBody PropertyAddRequest request){
-        try {
-            return ResultUtils.success(propertyService.update(id, request));
-        } catch (RuntimeException e) {
-            return new BaseResponse<>(-1, null, e.getMessage());
-        }
+        return ResultUtils.success(propertyService.update(id, request));
     }
     
     /**
@@ -69,10 +74,37 @@ public class PropertyController {
      */
     @GetMapping("/user/{sellerId}")
     public BaseResponse<List<PropertyVO>> getUserProperties(@PathVariable Long sellerId){
-        try {
-            return ResultUtils.success(propertyService.getUserProperties(sellerId));
-        } catch (RuntimeException e) {
-            return new BaseResponse<>(-1, null, e.getMessage());
+        return ResultUtils.success(propertyService.getUserProperties(sellerId));
+    }
+    
+    /**
+     * 获取指定房源的所有图片
+     */
+    @GetMapping("/{propertyId}/images")
+    public BaseResponse<List<PropertyImageVO>> getPropertyImages(@PathVariable Long propertyId){
+        return ResultUtils.success(propertyService.getPropertyImages(propertyId));
+    }
+    
+    /**
+     * 为房源添加图片
+     */
+    @PostMapping("/{propertyId}/images")
+    public BaseResponse<PropertyImageVO> addPropertyImage(
+            @PathVariable Long propertyId,
+            @RequestParam("imageFile") MultipartFile imageFile){
+        return ResultUtils.success(propertyService.addPropertyImage(propertyId, imageFile));
+    }
+    
+    /**
+     * 删除房源图片
+     */
+    @DeleteMapping("/images/{imageId}")
+    public BaseResponse<Boolean> deletePropertyImage(@PathVariable Long imageId){
+        boolean success = propertyService.deletePropertyImage(imageId);
+        if (success) {
+            return ResultUtils.success(true);
+        } else {
+            return new BaseResponse<>(-1, false, "图片不存在或删除失败");
         }
     }
     
