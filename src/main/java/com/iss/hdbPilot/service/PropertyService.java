@@ -2,8 +2,11 @@ package com.iss.hdbPilot.service;
 
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.iss.hdbPilot.model.dto.PageRequest;
+import com.iss.hdbPilot.model.dto.PropertyAddForm;
 import com.iss.hdbPilot.model.dto.PropertyAddRequest;
 import com.iss.hdbPilot.model.dto.PropertyQueryRequest;
 import com.iss.hdbPilot.model.vo.PropertyVO;
@@ -29,7 +32,7 @@ public interface PropertyService {
     /**
      * 创建房源
      */
-    PropertyVO create(PropertyAddRequest request);
+    PropertyVO create(PropertyAddForm form);
     
     /**
      * 更新房源
