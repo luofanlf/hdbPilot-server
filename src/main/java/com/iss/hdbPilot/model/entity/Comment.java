@@ -9,4 +9,10 @@ public class Comment {
     private Integer rating;           // Score
     private String content;           // Comment text
     private LocalDateTime createdAt;  // Time of creation
+    private Long propertyId;  // 新增字段，用于关联房屋
+
+    public Integer getRating() {
+        return rating;
+    }
+
 }

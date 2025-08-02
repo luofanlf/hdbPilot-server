@@ -22,13 +22,14 @@ public class CommentController {
         return "Comment submitted successfully";
     }
 
-    @GetMapping
-    public List<Comment> getAllComments() {
-        return commentService.getAllComments();
+    @GetMapping("/property/{propertyId}")
+    public List<Comment> getCommentsByProperty(@PathVariable Long propertyId) {
+        return commentService.getCommentsByProperty(propertyId);
     }
 
-    @GetMapping("/average")
-    public Double getAverageRating() {
-        return commentService.getAverageRating();
+    @GetMapping("/property/{propertyId}/average")
+    public Double getAverageRatingByProperty(@PathVariable Long propertyId) {
+        return commentService.getAverageRatingByProperty(propertyId);
     }
+
 }
