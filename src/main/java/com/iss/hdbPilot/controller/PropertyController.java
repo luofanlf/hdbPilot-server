@@ -2,12 +2,14 @@ package com.iss.hdbPilot.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.iss.hdbPilot.common.BaseResponse;
 import com.iss.hdbPilot.common.ResultUtils;
 import com.iss.hdbPilot.service.PropertyService;
 import com.iss.hdbPilot.model.dto.PageRequest;
+import com.iss.hdbPilot.model.dto.PropertyAddForm;
 import com.iss.hdbPilot.model.dto.PropertyAddRequest;
 import com.iss.hdbPilot.model.dto.PropertyQueryRequest;
 import com.iss.hdbPilot.model.vo.PropertyVO;
@@ -46,12 +48,8 @@ public class PropertyController {
      * 创建新房源
      */
     @PostMapping
-    public BaseResponse<PropertyVO> create(@Valid @RequestBody PropertyAddRequest request){
-        try {
-            return ResultUtils.success(propertyService.create(request));
-        } catch (RuntimeException e) {
-            return new BaseResponse<>(-1, null, e.getMessage());
-        }
+    public BaseResponse<PropertyVO> create(@ModelAttribute PropertyAddForm form){
+            return ResultUtils.success(propertyService.create(form));
     }
     
     /**
