@@ -2,7 +2,6 @@ package com.iss.hdbPilot.service;
 
 import java.util.List;
 
-import org.springframework.web.multipart.MultipartFile;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.iss.hdbPilot.model.dto.PageRequest;
@@ -16,7 +15,12 @@ public interface PropertyService {
     /**
      * 获取所有房源列表
      */
-    Page<PropertyVO> list(PropertyQueryRequest pageRequest);
+    Page<PropertyVO> list(PageRequest pageRequest);
+    
+    /**
+     * 根据筛选条件查询房源列表
+     */
+    Page<PropertyVO> search(PropertyQueryRequest queryRequest);
     
     /**
      * 获取所有房源列表（不分页，用于地图显示）

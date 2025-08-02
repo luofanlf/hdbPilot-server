@@ -29,7 +29,7 @@ public class PropertyController {
      * 获取所有房源列表
      */
     @GetMapping("/list")
-    public BaseResponse<Page<PropertyVO>> list(PropertyQueryRequest pageRequest){
+    public BaseResponse<Page<PropertyVO>> list(PageRequest pageRequest){
         return ResultUtils.success(propertyService.list(pageRequest));
     }
     
@@ -39,6 +39,14 @@ public class PropertyController {
     @GetMapping("/list/all")
     public BaseResponse<List<PropertyVO>> listAll(){
         return ResultUtils.success(propertyService.listAll());
+    }
+    
+    /**
+     * 根据筛选条件搜索房源
+     */
+    @GetMapping("/search")
+    public BaseResponse<Page<PropertyVO>> search(@Valid PropertyQueryRequest queryRequest){
+        return ResultUtils.success(propertyService.search(queryRequest));
     }
     
     /**
