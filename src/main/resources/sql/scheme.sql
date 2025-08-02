@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS comment (
   rating INT NOT NULL,
   content TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  ALTER TABLE comment ADD COLUMN property_id BIGINT;
 );
 
 

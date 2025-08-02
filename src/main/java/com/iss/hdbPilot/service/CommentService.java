@@ -25,5 +25,8 @@ public interface CommentService {
      * @return 平均评分
      */
     Double getAverageRating();
+    List<Comment> getCommentsByProperty(Long propertyId);
+    Double getAverageRatingByProperty(Long propertyId);
+
 }
 
