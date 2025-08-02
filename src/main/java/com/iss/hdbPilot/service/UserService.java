@@ -7,7 +7,7 @@ import com.iss.hdbPilot.model.entity.User;
 import com.iss.hdbPilot.model.vo.UserVO;
 
 public interface UserService {
-    
+
 
     /**
      * 用户登录
@@ -27,7 +27,7 @@ public interface UserService {
      * @return
      */
     Long adminLogin(String username,String password,HttpServletRequest request);
-    
+
     /**
      * 用户注册
      * @param username
@@ -67,4 +67,46 @@ public interface UserService {
      * @return true if the user was successfully deleted, false otherwise
      */
     boolean removeUserById(Long userId);
+
+    // ======================== 新增的用户自我管理方法 ========================
+    /**
+     * 更新用户的用户名
+     * @param userId 用户的ID
+     * @param newUsername 新的用户名
+     * @return true 如果更新成功，false 如果用户名已存在或更新失败
+     */
+    boolean updateUsername(Long userId, String newUsername);
+
+    /**
+     * 更新用户的密码
+     * @param userId 用户的ID
+     * @param oldPassword 旧密码（明文）
+     * @param newPassword 新密码（明文）
+     * @return true 如果更新成功，false 如果旧密码不匹配或更新失败
+     */
+    boolean updatePassword(Long userId, String oldPassword, String newPassword);
+
+    /**
+     * 更新用户的邮箱
+     * @param userId 用户的ID
+     * @param newEmail 新的邮箱
+     * @return true 如果更新成功，false 如果更新失败
+     */
+    boolean updateEmail(Long userId, String newEmail);
+
+    /**
+     * 更新用户的昵称
+     * @param userId 用户的ID
+     * @param newNickname 新的昵称
+     * @return true 如果更新成功，false 如果更新失败
+     */
+    boolean updateNickname(Long userId, String newNickname);
+
+    /**
+     * 更新用户的个人简介
+     * @param userId 用户的ID
+     * @param newBio 新的个人简介
+     * @return true 如果更新成功，false 如果更新失败
+     */
+    boolean updateBio(Long userId, String newBio);
 }

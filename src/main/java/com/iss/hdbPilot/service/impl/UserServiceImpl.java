@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import java.time.LocalDateTime; // 新增导入
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -67,12 +68,12 @@ public class UserServiceImpl implements UserService{
 
         //返回用户id
         return user.getId();
-        
+
     }
 
     @Override
     public Long register(String username,String password,String confirmPassword){
-    
+
         //校验注册参数
         if(username == null || password == null || confirmPassword == null){
             throw new RuntimeException("Username and password cannot be null");
@@ -106,9 +107,9 @@ public class UserServiceImpl implements UserService{
         userMapper.insert(user);
 
         return user.getId();
-        
+
     }
-    
+
     @Override
     public User getCurrentUser(HttpServletRequest request){
         Object userObj = request.getSession().getAttribute("user");
@@ -154,5 +155,75 @@ public class UserServiceImpl implements UserService{
             throw new IllegalArgumentException("User ID is illegal");
         }
         return userMapper.deleteById(userId) > 0;
+    }
+
+    // ======================== 新增的用户自我管理方法实现 ========================
+    @Override
+    public boolean updateUsername(Long userId, String newUsername) {
+        if (userId == null || newUsername == null || newUsername.isEmpty()) {
+            return false;
+        }
+        // 检查新用户名是否已存在
+        if (userMapper.selectCount(new QueryWrapper<User>().eq("username", newUsername)) > 0) {
+            return false;
+        }
+        User userToUpdate = new User();
+        userToUpdate.setId(userId);
+        userToUpdate.setUsername(newUsername);
+        userToUpdate.setUpdatedAt(LocalDateTime.now());
+        return userMapper.updateById(userToUpdate) > 0;
+    }
+
+    @Override
+    public boolean updatePassword(Long userId, String oldPassword, String newPassword) {
+        if (userId == null || oldPassword == null || newPassword == null || newPassword.length() < 8) {
+            return false;
+        }
+        User user = userMapper.selectById(userId);
+        if (user == null || !user.getPasswordHash().equals(getEncryptedPassword(oldPassword))) {
+            return false;
+        }
+        user.setPasswordHash(getEncryptedPassword(newPassword));
+        user.setUpdatedAt(LocalDateTime.now());
+        return userMapper.updateById(user) > 0;
+    }
+
+    @Override
+    public boolean updateEmail(Long userId, String newEmail) {
+        if (userId == null || newEmail == null || newEmail.isEmpty()) {
+            return false;
+        }
+        User userToUpdate = new User();
+        userToUpdate.setId(userId);
+        userToUpdate.setEmail(newEmail);
+        userToUpdate.setUpdatedAt(LocalDateTime.now());
+        return userMapper.updateById(userToUpdate) > 0;
+    }
+
+    @Override
+    public boolean updateNickname(Long userId, String newNickname) {
+        if (userId == null || newNickname == null || newNickname.isEmpty()) {
+            return false;
+        }
+        User userToUpdate = new User();
+        userToUpdate.setId(userId);
+        userToUpdate.setNickname(newNickname);
+        userToUpdate.setUpdatedAt(LocalDateTime.now());
+        return userMapper.updateById(userToUpdate) > 0;
+    }
+
+    @Override
+    public boolean updateBio(Long userId, String newBio) {
+        if (userId == null) {
+            return false;
+        }
+        if (newBio == null) {
+            newBio = ""; // 允许清空简介
+        }
+        User userToUpdate = new User();
+        userToUpdate.setId(userId);
+        userToUpdate.setBio(newBio);
+        userToUpdate.setUpdatedAt(LocalDateTime.now());
+        return userMapper.updateById(userToUpdate) > 0;
     }
 }
