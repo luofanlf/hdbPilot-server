@@ -42,19 +42,15 @@ public class PropertyServiceImpl implements PropertyService{
     private PropertyImageMapper propertyImageMapper;
 
     @Override
-    public Page<PropertyVO> list(PropertyQueryRequest pageRequest) {
+    public Page<PropertyVO> list(PageRequest pageRequest) {
         int pageNum = pageRequest.getPageNum();
         int pageSize = pageRequest.getPageSize();
-        String listingTitle = pageRequest.getListingTitle();
 
         // 构造分页对象 - 先查询Question实体
         Page<Property> questionPage = new Page<>(pageNum, pageSize);
 
         // 构造查询条件
         LambdaQueryWrapper<Property> wrapper = new LambdaQueryWrapper<>();
-        if (StringUtils.isNotBlank(listingTitle)) {
-            wrapper.like(Property::getListingTitle, listingTitle);
-        }
 
         // 执行分页查询
         Page<Property> result = propertyMapper.selectPage(questionPage, wrapper);
@@ -69,6 +65,95 @@ public class PropertyServiceImpl implements PropertyService{
         // LambdaQueryWrapper<Question> wrapper = new LambdaQueryWrapper<>();
         // List<Property> properties = propertyMapper.selectList(null);
         // return properties.stream().map(Property::toVO).collect(Collectors.toList());
+    }
+    
+    @Override
+    public Page<PropertyVO> search(PropertyQueryRequest queryRequest) {
+        int pageNum = queryRequest.getPageNum();
+        int pageSize = queryRequest.getPageSize();
+
+        // 构造分页对象
+        Page<Property> propertyPage = new Page<>(pageNum, pageSize);
+
+        // 构造查询条件
+        LambdaQueryWrapper<Property> wrapper = new LambdaQueryWrapper<>();
+        
+        // 房源标题模糊查询
+        if (StringUtils.isNotBlank(queryRequest.getListingTitle())) {
+            wrapper.like(Property::getListingTitle, queryRequest.getListingTitle());
+        }
+        
+        // 邮政编码精确查询
+        if (StringUtils.isNotBlank(queryRequest.getPostalCode())) {
+            wrapper.eq(Property::getPostalCode, queryRequest.getPostalCode());
+        }
+        
+        // 卧室数量范围查询
+        if (queryRequest.getBedroomNumberMin() != null) {
+            wrapper.ge(Property::getBedroomNumber, queryRequest.getBedroomNumberMin());
+        }
+        if (queryRequest.getBedroomNumberMax() != null) {
+            wrapper.le(Property::getBedroomNumber, queryRequest.getBedroomNumberMax());
+        }
+        
+        // 浴室数量范围查询
+        if (queryRequest.getBathroomNumberMin() != null) {
+            wrapper.ge(Property::getBathroomNumber, queryRequest.getBathroomNumberMin());
+        }
+        if (queryRequest.getBathroomNumberMax() != null) {
+            wrapper.le(Property::getBathroomNumber, queryRequest.getBathroomNumberMax());
+        }
+        
+        // 楼层范围查询（字符串比较）
+        if (StringUtils.isNotBlank(queryRequest.getStoreyMin())) {
+            wrapper.ge(Property::getStorey, queryRequest.getStoreyMin());
+        }
+        if (StringUtils.isNotBlank(queryRequest.getStoreyMax())) {
+            wrapper.le(Property::getStorey, queryRequest.getStoreyMax());
+        }
+        
+        // 建筑面积范围查询
+        if (queryRequest.getFloorAreaSqmMin() != null) {
+            wrapper.ge(Property::getFloorAreaSqm, queryRequest.getFloorAreaSqmMin());
+        }
+        if (queryRequest.getFloorAreaSqmMax() != null) {
+            wrapper.le(Property::getFloorAreaSqm, queryRequest.getFloorAreaSqmMax());
+        }
+        
+        // 顶层年份范围查询
+        if (queryRequest.getTopYearMin() != null) {
+            wrapper.ge(Property::getTopYear, queryRequest.getTopYearMin());
+        }
+        if (queryRequest.getTopYearMax() != null) {
+            wrapper.le(Property::getTopYear, queryRequest.getTopYearMax());
+        }
+        
+        // 转售价格范围查询
+        if (queryRequest.getResalePriceMin() != null) {
+            wrapper.ge(Property::getResalePrice, queryRequest.getResalePriceMin());
+        }
+        if (queryRequest.getResalePriceMax() != null) {
+            wrapper.le(Property::getResalePrice, queryRequest.getResalePriceMax());
+        }
+        
+        // 城镇查询
+        if (StringUtils.isNotBlank(queryRequest.getTown())) {
+            wrapper.eq(Property::getTown, queryRequest.getTown());
+        }
+        
+        // 按创建时间倒序排列
+        wrapper.orderByDesc(Property::getCreatedAt);
+
+        // 执行分页查询
+        Page<Property> result = propertyMapper.selectPage(propertyPage, wrapper);
+
+        // 转换为PropertyVO
+        Page<PropertyVO> propertyVOPage = new Page<>(pageNum, pageSize, result.getTotal());
+        propertyVOPage.setRecords(result.getRecords().stream()
+                .map(Property::toVO)
+                .collect(Collectors.toList()));
+
+        return propertyVOPage;
     }
     
     @Override
