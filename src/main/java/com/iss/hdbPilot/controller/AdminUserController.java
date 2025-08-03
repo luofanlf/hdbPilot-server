@@ -5,7 +5,7 @@ import com.iss.hdbPilot.common.BaseResponse;
 import com.iss.hdbPilot.common.ResultUtils;
 import com.iss.hdbPilot.model.dto.PageRequest;
 import com.iss.hdbPilot.model.dto.UserLoginRequest;
-import com.iss.hdbPilot.model.dto.UserUpdateRequest;
+import com.iss.hdbPilot.model.dto.AdminUserUpdateRequest;
 import com.iss.hdbPilot.model.vo.UserVO;
 import com.iss.hdbPilot.service.UserService;
 import org.springframework.web.bind.annotation.*;
@@ -80,7 +80,7 @@ public class AdminUserController {
      * Accepts a POST request with user update data and returns a success or failure response.
      */
     @PostMapping("/update")
-    public BaseResponse<Boolean> updateUser(@RequestBody UserUpdateRequest request) {
+    public BaseResponse<Boolean> updateUser(@RequestBody AdminUserUpdateRequest request) {
         if (request == null || request.getId() == null) {
             return new BaseResponse<>(-1, false, "User ID cannot be null");
         }

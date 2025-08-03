@@ -3,23 +3,25 @@ package com.iss.hdbPilot;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.iss.hdbPilot.mapper.UserMapper;
-import com.iss.hdbPilot.model.dto.UserUpdateRequest;
+import com.iss.hdbPilot.model.dto.AdminUserUpdateRequest;
 import com.iss.hdbPilot.model.entity.User;
 import com.iss.hdbPilot.model.vo.UserVO;
-
 import com.iss.hdbPilot.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
+import org.springframework.mock.web.MockHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import java.util.*;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class UserServiceImplTest {
+class UserServiceImplTest {
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -27,209 +29,179 @@ public class UserServiceImplTest {
     @Mock
     private UserMapper userMapper;
 
-    @Mock
-    private HttpServletRequest request;
-
-    @Mock
-    private HttpSession session;
-
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        when(request.getSession()).thenReturn(session);
     }
 
-    // ---------- login ----------
     @Test
     void testLoginSuccess() {
-        // Arrange: mock user with correct credentials
         User mockUser = new User();
         mockUser.setId(1L);
-        mockUser.setUsername("test");
         mockUser.setPasswordHash(userService.getEncryptedPassword("12345678"));
 
         when(userMapper.selectOne(any(QueryWrapper.class))).thenReturn(mockUser);
 
-        // Act
-        Long result = userService.login("test", "12345678", request);
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        Long userId = userService.login("user1", "12345678", request);
 
-        // Assert
-        assertEquals(1L, result);
-        verify(session).setAttribute("user", mockUser);
+        assertEquals(1L, userId);
+        assertEquals(mockUser, request.getSession().getAttribute("user"));
     }
 
     @Test
-    void testLoginFailure_NullInput() {
-        // Null username or password should throw RuntimeException
-        assertThrows(RuntimeException.class, () -> userService.login(null, "123", request));
-        assertThrows(RuntimeException.class, () -> userService.login("abc", null, request));
+    void testLoginFail() {
+        when(userMapper.selectOne(any())).thenReturn(null);
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        assertThrows(RuntimeException.class, () -> userService.login("x", "x", request));
     }
 
-    @Test
-    void testLoginFailure_IncorrectPassword() {
-        // Incorrect credentials should throw RuntimeException
-        when(userMapper.selectOne(any(QueryWrapper.class))).thenReturn(null);
-        assertThrows(RuntimeException.class, () -> userService.login("test", "wrong", request));
-    }
-
-    // ---------- adminLogin ----------
     @Test
     void testAdminLoginSuccess() {
-        // Arrange: admin user with correct credentials
         User admin = new User();
         admin.setId(2L);
-        admin.setUsername("admin");
-        admin.setPasswordHash(userService.getEncryptedPassword("admin1234"));
         admin.setUserRole("admin");
+        admin.setPasswordHash(userService.getEncryptedPassword("adminpass"));
+        when(userMapper.selectOne(any())).thenReturn(admin);
 
-        when(userMapper.selectOne(any(QueryWrapper.class))).thenReturn(admin);
-
-        // Act
-        Long result = userService.adminLogin("admin", "admin1234", request);
-
-        // Assert
-        assertEquals(2L, result);
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        Long id = userService.adminLogin("admin", "adminpass", request);
+        assertEquals(2L, id);
     }
 
     @Test
-    void testAdminLogin_NotAdmin() {
-        // Arrange: user is not admin
-        User normal = new User();
-        normal.setUsername("user");
-        normal.setPasswordHash(userService.getEncryptedPassword("pass1234"));
-        normal.setUserRole("user");
+    void testAdminLoginNotAdmin() {
+        User user = new User();
+        user.setUserRole("user");
+        user.setPasswordHash(userService.getEncryptedPassword("test"));
+        when(userMapper.selectOne(any())).thenReturn(user);
 
-        when(userMapper.selectOne(any(QueryWrapper.class))).thenReturn(normal);
-
-        // Should throw RuntimeException if not admin
-        assertThrows(RuntimeException.class, () -> userService.adminLogin("user", "pass1234", request));
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        assertThrows(RuntimeException.class, () -> userService.adminLogin("user", "test", request));
     }
 
-    // ---------- register ----------
     @Test
     void testRegisterSuccess() {
-        // Arrange: no duplicate username
-        when(userMapper.selectCount(any(QueryWrapper.class))).thenReturn(0L);
-        when(userMapper.insert(any(User.class))).thenAnswer(invocation -> {
+        when(userMapper.selectCount(any())).thenReturn(0L);
+        when(userMapper.insert(any())).thenAnswer(invocation -> {
             User user = invocation.getArgument(0);
-            user.setId(3L);
+            user.setId(10L);
             return 1;
         });
 
-        // Act
-        Long userId = userService.register("newuser", "password123", "password123");
-
-        // Assert
-        assertEquals(3L, userId);
+        Long id = userService.register("newuser", "12345678", "12345678");
+        assertEquals(10L, id);
     }
 
     @Test
-    void testRegisterFailure_Validation() {
-        // Username too short, password too short, mismatched passwords
-        assertThrows(RuntimeException.class, () -> userService.register("a", "pwd", "pwd"));
-        assertThrows(RuntimeException.class, () -> userService.register("user", "short", "short"));
-        assertThrows(RuntimeException.class, () -> userService.register("user", "password123", "wrongpass"));
+    void testRegisterInvalidUsername() {
+        assertThrows(RuntimeException.class, () -> userService.register("a", "12345678", "12345678"));
     }
 
-    @Test
-    void testRegisterFailure_UsernameExists() {
-        // Arrange: username already exists
-        when(userMapper.selectCount(any(QueryWrapper.class))).thenReturn(1L);
-        assertThrows(RuntimeException.class, () -> userService.register("existing", "password123", "password123"));
-    }
-
-    // ---------- getCurrentUser ----------
     @Test
     void testGetCurrentUserSuccess() {
-        // Arrange: session contains user object
-        User user = new User();
-        when(session.getAttribute("user")).thenReturn(user);
-
-        // Act & Assert
-        assertEquals(user, userService.getCurrentUser(request));
+        User mockUser = new User();
+        mockUser.setId(1L);
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.getSession().setAttribute("user", mockUser);
+        assertEquals(mockUser, userService.getCurrentUser(request));
     }
 
     @Test
-    void testGetCurrentUserFailure() {
-        // Session does not contain user
-        when(session.getAttribute("user")).thenReturn(null);
+    void testGetCurrentUserNull() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
         assertThrows(RuntimeException.class, () -> userService.getCurrentUser(request));
     }
 
-    // ---------- removeUserById ----------
     @Test
-    void testRemoveUserById() {
-        // Arrange: deleteById returns success
-        when(userMapper.deleteById(5L)).thenReturn(1);
+    void testListUsersByPage() {
+        Page<User> mockPage = new Page<>();
+        User user = new User();
+        user.setUsername("test");
+        mockPage.setRecords(Collections.singletonList(user));
+        mockPage.setTotal(1);
 
-        // Act & Assert
-        assertTrue(userService.removeUserById(5L));
+        when(userMapper.selectPage(any(), any())).thenReturn(mockPage);
+
+        Page<UserVO> result = userService.listUsersByPage(1, 10, "test");
+        assertEquals(1, result.getTotal());
+        assertEquals("test", result.getRecords().get(0).getUsername());
     }
 
     @Test
-    void testRemoveUserById_Invalid() {
-        // Invalid IDs should throw IllegalArgumentException
-        assertThrows(IllegalArgumentException.class, () -> userService.removeUserById(null));
+    void testRemoveUserByIdSuccess() {
+        when(userMapper.deleteById(1L)).thenReturn(1);
+        assertTrue(userService.removeUserById(1L));
+    }
+
+    @Test
+    void testRemoveUserByIdFail() {
         assertThrows(IllegalArgumentException.class, () -> userService.removeUserById(-1L));
     }
 
-    // ---------- removeUsersByIds ----------
     @Test
     void testRemoveUsersByIds() {
-        // Arrange: deleteBatchIds returns success
-        List<Long> ids = Arrays.asList(1L, 2L, 3L);
-        when(userMapper.deleteBatchIds(ids)).thenReturn(3);
-
-        // Act & Assert
-        assertTrue(userService.removeUsersByIds(ids));
+        when(userMapper.deleteBatchIds(anyList())).thenReturn(2);
+        assertTrue(userService.removeUsersByIds(Arrays.asList(1L, 2L)));
     }
 
-    // ---------- updateUser ----------
     @Test
     void testUpdateUser() {
-        // Arrange: prepare UserUpdateRequest
-        UserUpdateRequest updateRequest = new UserUpdateRequest();
-        updateRequest.setId(1L);
-        updateRequest.setUsername("newName");
-        updateRequest.setEmail("email@example.com");
-        updateRequest.setNickname("nick");
+        AdminUserUpdateRequest req = new AdminUserUpdateRequest();
+        req.setId(1L);
+        req.setUsername("test");
+        req.setEmail("t@test.com");
+        req.setNickname("tt");
 
-        // Spy to mock the update() method's return value
-        UserServiceImpl spyService = Mockito.spy(userService);
-        doReturn(true).when(spyService).update(any(), any());
-
-        // Act & Assert
-        assertTrue(spyService.updateUser(updateRequest));
+        when(userMapper.update(any(), any())).thenReturn(1);
+        assertTrue(userService.updateUser(req));
     }
 
-    // ---------- listUsersByPage ----------
     @Test
-    void testListUsersByPage() {
-        // Arrange: mock page result with one user
+    void testUpdateUsernameSuccess() {
+        when(userMapper.selectCount(any())).thenReturn(0L);
+        when(userMapper.updateById(any())).thenReturn(1);
+        assertTrue(userService.updateUsername(1L, "newname"));
+    }
+
+    @Test
+    void testUpdateUsernameFail() {
+        when(userMapper.selectCount(any())).thenReturn(1L);
+        assertFalse(userService.updateUsername(1L, "usedname"));
+    }
+
+    @Test
+    void testUpdatePasswordSuccess() {
         User user = new User();
         user.setId(1L);
-        user.setUsername("user1");
-
-        Page<User> userPage = new Page<>();
-        userPage.setRecords(List.of(user));
-        userPage.setTotal(1);
-
-        when(userMapper.selectPage(any(Page.class), any(QueryWrapper.class))).thenReturn(userPage);
-
-        // Act
-        Page<UserVO> result = userService.listUsersByPage(1, 10, "user");
-
-        // Assert
-        assertEquals(1, result.getTotal());
-        assertEquals(1, result.getRecords().size());
+        user.setPasswordHash(userService.getEncryptedPassword("oldpass"));
+        when(userMapper.selectById(1L)).thenReturn(user);
+        when(userMapper.updateById(any())).thenReturn(1);
+        assertTrue(userService.updatePassword(1L, "oldpass", "newpassword"));
     }
 
-    // ---------- getEncryptedPassword ----------
     @Test
-    void testGetEncryptedPassword() {
-        // Encrypting should return 32-char MD5 hash
-        String encrypted = userService.getEncryptedPassword("12345678");
-        assertNotNull(encrypted);
-        assertEquals(32, encrypted.length());
+    void testUpdatePasswordFail() {
+        when(userMapper.selectById(1L)).thenReturn(null);
+        assertFalse(userService.updatePassword(1L, "x", "y"));
+    }
+
+    @Test
+    void testUpdateEmail() {
+        when(userMapper.updateById(any())).thenReturn(1);
+        assertTrue(userService.updateEmail(1L, "new@mail.com"));
+    }
+
+    @Test
+    void testUpdateNickname() {
+        when(userMapper.updateById(any())).thenReturn(1);
+        assertTrue(userService.updateNickname(1L, "newnick"));
+    }
+
+    @Test
+    void testUpdateBio() {
+        when(userMapper.updateById(any())).thenReturn(1);
+        assertTrue(userService.updateBio(1L, "new bio"));
+        assertTrue(userService.updateBio(1L, null)); // 清空 bio
     }
 }

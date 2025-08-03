@@ -1,8 +1,11 @@
 package com.iss.hdbPilot.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.iss.hdbPilot.mapper.UserMapper;
+import com.iss.hdbPilot.model.dto.AdminUserUpdateRequest;
 import com.iss.hdbPilot.model.entity.User;
 import com.iss.hdbPilot.model.vo.UserVO;
 import com.iss.hdbPilot.service.UserService;
@@ -12,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -128,11 +132,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
 
     @Override
-    public Page<UserVO> listUsersByPage(long current, long size) {
+    public Page<UserVO> listUsersByPage(long current, long size, String keyword) {
         Page<User> page = new Page<>(current, size);
 
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.ne("user_role", "admin");
+        queryWrapper.ne("user_role", "admin"); // 排除管理员
 
         if (keyword != null && !keyword.trim().isEmpty()) {
             String kw = keyword.trim();
@@ -157,6 +161,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return userVOPage;
     }
 
+
     @Override
     public boolean removeUserById(Long userId) {
         if (userId == null || userId <= 0) {
@@ -171,7 +176,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public boolean updateUser(UserUpdateRequest request) {
+    public boolean updateUser(AdminUserUpdateRequest request) {
         // 使用 UpdateWrapper 进行更新
         UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("id", request.getId());
@@ -184,7 +189,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // update(user, wrapper) 返回boolean
         return this.update(user, updateWrapper);
     }
-
     // ======================== 新增的用户自我管理方法实现 ========================
     @Override
     public boolean updateUsername(Long userId, String newUsername) {
