@@ -41,4 +41,20 @@ public class CommentServiceImpl implements CommentService {
                 .map(obj -> ((Number)obj).doubleValue())
                 .orElse(0.0);
     }
+    @Override
+    public List<Comment> getCommentsByProperty(Long propertyId) {
+        QueryWrapper<Comment> query = new QueryWrapper<>();
+        query.eq("property_id", propertyId);
+        return commentMapper.selectList(query);
+    }
+
+    @Override
+    public Double getAverageRatingByProperty(Long propertyId) {
+        QueryWrapper<Comment> query = new QueryWrapper<>();
+        query.eq("property_id", propertyId);
+        List<Comment> comments = commentMapper.selectList(query);
+        if (comments.isEmpty()) return 0.0;
+        return comments.stream().mapToInt(Comment::getRating).average().orElse(0.0);
+    }
+
 }

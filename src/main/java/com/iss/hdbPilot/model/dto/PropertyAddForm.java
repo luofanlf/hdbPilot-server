@@ -1,10 +1,19 @@
 package com.iss.hdbPilot.model.dto;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
+import org.springframework.web.multipart.MultipartFile;
+
 import lombok.Data;
-import javax.validation.constraints.*;
+import java.util.List;
 
 @Data
-public class PropertyAddRequest {
+public class PropertyAddForm {
     /**
      * 房源标题
      */
@@ -106,11 +115,15 @@ public class PropertyAddRequest {
      */
     private Float forecastPrice;
 
-
     /**
      * 状态
      */
     @NotBlank(message = "状态不能为空")
     @Pattern(regexp = "^(available|sold|pending)$", message = "状态必须是available、sold或pending")
     private String status;
-} 
+
+    /**
+     * 图片文件列表（支持多张图片）
+     */
+    private List<MultipartFile> imageFiles;
+}

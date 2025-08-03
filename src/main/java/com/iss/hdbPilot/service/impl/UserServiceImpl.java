@@ -1,11 +1,8 @@
 package com.iss.hdbPilot.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.iss.hdbPilot.mapper.UserMapper;
-import com.iss.hdbPilot.model.dto.UserUpdateRequest;
 import com.iss.hdbPilot.model.entity.User;
 import com.iss.hdbPilot.model.vo.UserVO;
 import com.iss.hdbPilot.service.UserService;
@@ -131,11 +128,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
 
     @Override
-    public Page<UserVO> listUsersByPage(long current, long size, String keyword) {
+    public Page<UserVO> listUsersByPage(long current, long size) {
         Page<User> page = new Page<>(current, size);
 
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.ne("user_role", "admin"); // 排除管理员
+        queryWrapper.ne("user_role", "admin");
 
         if (keyword != null && !keyword.trim().isEmpty()) {
             String kw = keyword.trim();
@@ -159,7 +156,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         userVOPage.setRecords(voList);
         return userVOPage;
     }
-
 
     @Override
     public boolean removeUserById(Long userId) {
@@ -189,4 +185,73 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return this.update(user, updateWrapper);
     }
 
+    // ======================== 新增的用户自我管理方法实现 ========================
+    @Override
+    public boolean updateUsername(Long userId, String newUsername) {
+        if (userId == null || newUsername == null || newUsername.isEmpty()) {
+            return false;
+        }
+        // 检查新用户名是否已存在
+        if (userMapper.selectCount(new QueryWrapper<User>().eq("username", newUsername)) > 0) {
+            return false;
+        }
+        User userToUpdate = new User();
+        userToUpdate.setId(userId);
+        userToUpdate.setUsername(newUsername);
+        userToUpdate.setUpdatedAt(LocalDateTime.now());
+        return userMapper.updateById(userToUpdate) > 0;
+    }
+
+    @Override
+    public boolean updatePassword(Long userId, String oldPassword, String newPassword) {
+        if (userId == null || oldPassword == null || newPassword == null || newPassword.length() < 8) {
+            return false;
+        }
+        User user = userMapper.selectById(userId);
+        if (user == null || !user.getPasswordHash().equals(getEncryptedPassword(oldPassword))) {
+            return false;
+        }
+        user.setPasswordHash(getEncryptedPassword(newPassword));
+        user.setUpdatedAt(LocalDateTime.now());
+        return userMapper.updateById(user) > 0;
+    }
+
+    @Override
+    public boolean updateEmail(Long userId, String newEmail) {
+        if (userId == null || newEmail == null || newEmail.isEmpty()) {
+            return false;
+        }
+        User userToUpdate = new User();
+        userToUpdate.setId(userId);
+        userToUpdate.setEmail(newEmail);
+        userToUpdate.setUpdatedAt(LocalDateTime.now());
+        return userMapper.updateById(userToUpdate) > 0;
+    }
+
+    @Override
+    public boolean updateNickname(Long userId, String newNickname) {
+        if (userId == null || newNickname == null || newNickname.isEmpty()) {
+            return false;
+        }
+        User userToUpdate = new User();
+        userToUpdate.setId(userId);
+        userToUpdate.setNickname(newNickname);
+        userToUpdate.setUpdatedAt(LocalDateTime.now());
+        return userMapper.updateById(userToUpdate) > 0;
+    }
+
+    @Override
+    public boolean updateBio(Long userId, String newBio) {
+        if (userId == null) {
+            return false;
+        }
+        if (newBio == null) {
+            newBio = ""; // 允许清空简介
+        }
+        User userToUpdate = new User();
+        userToUpdate.setId(userId);
+        userToUpdate.setBio(newBio);
+        userToUpdate.setUpdatedAt(LocalDateTime.now());
+        return userMapper.updateById(userToUpdate) > 0;
+    }
 }

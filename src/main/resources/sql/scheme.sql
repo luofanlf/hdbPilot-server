@@ -57,6 +57,9 @@ CREATE TABLE IF NOT EXISTS comment (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+ALTER TABLE comment ADD COLUMN property_id BIGINT;
+
+
 
 -- property_image table
 CREATE TABLE IF NOT EXISTS property_image (
