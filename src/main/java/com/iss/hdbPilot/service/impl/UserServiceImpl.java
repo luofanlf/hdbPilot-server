@@ -1,8 +1,11 @@
 package com.iss.hdbPilot.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.iss.hdbPilot.mapper.UserMapper;
+import com.iss.hdbPilot.model.dto.UserUpdateRequest;
 import com.iss.hdbPilot.model.entity.User;
 import com.iss.hdbPilot.model.vo.UserVO;
 import com.iss.hdbPilot.service.UserService;
@@ -17,7 +20,7 @@ import java.util.stream.Collectors;
 
 
 @Service
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService{
 
     @Autowired
     private UserMapper userMapper;
@@ -128,11 +131,20 @@ public class UserServiceImpl implements UserService{
 
 
     @Override
-    public Page<UserVO> listUsersByPage(long current, long size) {
+    public Page<UserVO> listUsersByPage(long current, long size, String keyword) {
         Page<User> page = new Page<>(current, size);
 
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.ne("user_role", "admin");
+        queryWrapper.ne("user_role", "admin"); // 排除管理员
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            String kw = keyword.trim();
+            queryWrapper.and(wrapper ->
+                    wrapper.like("username", kw)
+                            .or()
+                            .like("email", kw)
+            );
+        }
 
         Page<User> userPage = userMapper.selectPage(page, queryWrapper);
 
@@ -148,6 +160,7 @@ public class UserServiceImpl implements UserService{
         return userVOPage;
     }
 
+
     @Override
     public boolean removeUserById(Long userId) {
         if (userId == null || userId <= 0) {
@@ -155,4 +168,25 @@ public class UserServiceImpl implements UserService{
         }
         return userMapper.deleteById(userId) > 0;
     }
+
+    @Override
+    public boolean removeUsersByIds(List<Long> userIds) {
+        return userMapper.deleteBatchIds(userIds) > 0;
+    }
+
+    @Override
+    public boolean updateUser(UserUpdateRequest request) {
+        // 使用 UpdateWrapper 进行更新
+        UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("id", request.getId());
+
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setNickname(request.getNickname());
+
+        // update(user, wrapper) 返回boolean
+        return this.update(user, updateWrapper);
+    }
+
 }

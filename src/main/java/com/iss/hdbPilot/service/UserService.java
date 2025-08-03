@@ -3,8 +3,11 @@ package com.iss.hdbPilot.service;
 import javax.servlet.http.HttpServletRequest;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.iss.hdbPilot.model.dto.UserUpdateRequest;
 import com.iss.hdbPilot.model.entity.User;
 import com.iss.hdbPilot.model.vo.UserVO;
+
+import java.util.List;
 
 public interface UserService {
     
@@ -58,7 +61,7 @@ public interface UserService {
      * @param size the number of users per page
      * @return a page of UserVO objects representing the users
      */
-    Page<UserVO> listUsersByPage(long current, long size);
+    Page<UserVO> listUsersByPage(long current, long size, String keyword);
 
     /**
      * Deletes a user by their ID. Typically used by an administrator.
@@ -67,4 +70,8 @@ public interface UserService {
      * @return true if the user was successfully deleted, false otherwise
      */
     boolean removeUserById(Long userId);
+
+    boolean removeUsersByIds(List<Long> userIds);
+
+    boolean updateUser(UserUpdateRequest request);
 }
