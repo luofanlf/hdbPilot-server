@@ -1,8 +1,11 @@
 package com.iss.hdbPilot.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.iss.hdbPilot.mapper.UserMapper;
+import com.iss.hdbPilot.model.dto.AdminUserUpdateRequest;
 import com.iss.hdbPilot.model.entity.User;
 import com.iss.hdbPilot.model.vo.UserVO;
 import com.iss.hdbPilot.service.UserService;
@@ -12,13 +15,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
-import java.time.LocalDateTime; // 新增导入
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
 
 @Service
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService{
 
     @Autowired
     private UserMapper userMapper;
@@ -68,12 +71,12 @@ public class UserServiceImpl implements UserService{
 
         //返回用户id
         return user.getId();
-
+        
     }
 
     @Override
     public Long register(String username,String password,String confirmPassword){
-
+    
         //校验注册参数
         if(username == null || password == null || confirmPassword == null){
             throw new RuntimeException("Username and password cannot be null");
@@ -107,9 +110,9 @@ public class UserServiceImpl implements UserService{
         userMapper.insert(user);
 
         return user.getId();
-
+        
     }
-
+    
     @Override
     public User getCurrentUser(HttpServletRequest request){
         Object userObj = request.getSession().getAttribute("user");
@@ -129,11 +132,20 @@ public class UserServiceImpl implements UserService{
 
 
     @Override
-    public Page<UserVO> listUsersByPage(long current, long size) {
+    public Page<UserVO> listUsersByPage(long current, long size, String keyword) {
         Page<User> page = new Page<>(current, size);
 
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.ne("user_role", "admin");
+        queryWrapper.ne("user_role", "admin"); // 排除管理员
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            String kw = keyword.trim();
+            queryWrapper.and(wrapper ->
+                    wrapper.like("username", kw)
+                            .or()
+                            .like("email", kw)
+            );
+        }
 
         Page<User> userPage = userMapper.selectPage(page, queryWrapper);
 
@@ -149,6 +161,7 @@ public class UserServiceImpl implements UserService{
         return userVOPage;
     }
 
+
     @Override
     public boolean removeUserById(Long userId) {
         if (userId == null || userId <= 0) {
@@ -157,6 +170,25 @@ public class UserServiceImpl implements UserService{
         return userMapper.deleteById(userId) > 0;
     }
 
+    @Override
+    public boolean removeUsersByIds(List<Long> userIds) {
+        return userMapper.deleteBatchIds(userIds) > 0;
+    }
+
+    @Override
+    public boolean updateUser(AdminUserUpdateRequest request) {
+        // 使用 UpdateWrapper 进行更新
+        UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("id", request.getId());
+
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setNickname(request.getNickname());
+
+        // update(user, wrapper) 返回boolean
+        return this.update(user, updateWrapper);
+    }
     // ======================== 新增的用户自我管理方法实现 ========================
     @Override
     public boolean updateUsername(Long userId, String newUsername) {
