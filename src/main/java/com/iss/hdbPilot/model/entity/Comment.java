@@ -11,8 +11,5 @@ public class Comment {
     private LocalDateTime createdAt;  // Time of creation
     private Long propertyId;  // 新增字段，用于关联房屋
 
-    public Integer getRating() {
-        return rating;
-    }
 
 }
