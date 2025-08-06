@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS comment (
 
 ALTER TABLE comment ADD COLUMN property_id BIGINT;
 
-
+select * from users where username = 'luofan222'
 
 -- property_image table
 CREATE TABLE IF NOT EXISTS property_image (
