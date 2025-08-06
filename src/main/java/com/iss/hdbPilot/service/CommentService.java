@@ -27,6 +27,7 @@ public interface CommentService {
     Double getAverageRating();
     List<Comment> getCommentsByProperty(Long propertyId);
     Double getAverageRatingByProperty(Long propertyId);
+    void deleteCommentsByIds(List<Long> ids);
 
 }
 

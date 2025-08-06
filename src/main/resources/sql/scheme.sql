@@ -51,15 +51,14 @@ INSERT INTO property (listing_title, seller_id, town, postal_code, bedroom_numbe
 
 -- comment
 CREATE TABLE IF NOT EXISTS comment (
-  id BIGINT PRIMARY KEY AUTO_INCREMENT,
-  rating INT NOT NULL,
-  content TEXT,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                                       id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                                       property_id BIGINT NOT NULL,
+                                       rating INT NOT NULL,
+                                       content TEXT,
+                                       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                                       CONSTRAINT fk_comment_property FOREIGN KEY (property_id) REFERENCES property(id) ON DELETE CASCADE
 );
 
-ALTER TABLE comment ADD COLUMN property_id BIGINT;
-
-select * from users where username = 'luofan222'
 
 -- property_image table
 CREATE TABLE IF NOT EXISTS property_image (
@@ -79,3 +78,15 @@ CREATE TABLE IF NOT EXISTS favorite (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     UNIQUE KEY unique_user_property (user_id, property_id) COMMENT '用户和房源的唯一约束'
 ) COMMENT '用户收藏表';
+
+INSERT INTO comment (property_id, rating, content, created_at) VALUES
+                                                                   (1, 5, 'Excellent property, very spacious and well maintained!', NOW() - INTERVAL 10 DAY),
+                                                                   (2, 4, 'Good location and reasonable price, but a bit noisy.', NOW() - INTERVAL 7 DAY),
+                                                                   (3, 3, 'Average experience, some issues with the plumbing.', NOW() - INTERVAL 3 DAY),
+                                                                   (4, 2, 'Not satisfied with the management, needs improvement.', NOW() - INTERVAL 2 HOUR),
+                                                                   (5, 1, 'Poor condition, would not recommend this property.', NOW() - INTERVAL 30 MINUTE),
+                                                                    (6, 5, 'Spacious layout with modern design, highly recommended!', NOW() - INTERVAL 14 DAY),
+                                                                    (7, 4, 'Nice view and good neighborhood, but a bit old.', NOW() - INTERVAL 9 DAY),
+                                                                    (8, 3, 'Fair deal for the price, but lacks nearby amenities.', NOW() - INTERVAL 5 DAY),
+                                                                    (9, 2, 'Had issues with the water supply during the visit.', NOW() - INTERVAL 1 DAY),
+                                                                    (10, 1, 'Very poor maintenance and cleanliness, disappointing.', NOW() - INTERVAL 1 HOUR);

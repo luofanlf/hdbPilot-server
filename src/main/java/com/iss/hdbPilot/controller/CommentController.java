@@ -48,5 +48,21 @@ public class CommentController {
     public Double getAverageRatingByProperty(@PathVariable Long propertyId) {
         return commentService.getAverageRatingByProperty(propertyId);
     }
+    // get all comments
+    @GetMapping
+    public List<Comment> getAllComments() {
+        return commentService.getAllComments();
+    }
+
+    // Deleting comments in bulk
+    @PostMapping("/delete")
+    public ResponseEntity<Map<String, String>> deleteComments(@RequestBody Map<String, List<Long>> body) {
+        List<Long> ids = body.get("ids");
+        if (ids == null || ids.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "No ids provided"));
+        }
+        commentService.deleteCommentsByIds(ids);
+        return ResponseEntity.ok(Map.of("message", "Comments deleted successfully"));
+    }
 
 }

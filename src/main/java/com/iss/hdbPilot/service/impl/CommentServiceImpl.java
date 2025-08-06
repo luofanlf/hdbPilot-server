@@ -31,6 +31,7 @@ public class CommentServiceImpl implements CommentService {
         return commentMapper.selectList(null);
     }
 
+
     @Override
     public Double getAverageRating() {
         QueryWrapper<Comment> wrapper = new QueryWrapper<>();
@@ -55,6 +56,16 @@ public class CommentServiceImpl implements CommentService {
         List<Comment> comments = commentMapper.selectList(query);
         if (comments.isEmpty()) return 0.0;
         return comments.stream().mapToInt(Comment::getRating).average().orElse(0.0);
+    }
+
+    @Override
+    public void deleteCommentsByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return;
+        }
+        QueryWrapper<Comment> query = new QueryWrapper<>();
+        query.in("id", ids);
+        commentMapper.delete(query);
     }
 
 }
