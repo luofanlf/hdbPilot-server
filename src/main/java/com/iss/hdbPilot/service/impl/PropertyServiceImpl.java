@@ -47,30 +47,40 @@ public class PropertyServiceImpl implements PropertyService{
         int pageNum = pageRequest.getPageNum();
         int pageSize = pageRequest.getPageSize();
 
-        // 构造分页对象 - 先查询Question实体
-        Page<Property> questionPage = new Page<>(pageNum, pageSize);
+        // 构造分页对象 - 先查询Property实体
+        Page<Property> propertyPage = new Page<>(pageNum, pageSize);
 
         // 构造查询条件
         LambdaQueryWrapper<Property> wrapper = new LambdaQueryWrapper<>();
 
         // 执行分页查询
-        Page<Property> result = propertyMapper.selectPage(questionPage, wrapper);
+        Page<Property> result = propertyMapper.selectPage(propertyPage, wrapper);
 
-        // 转换为QuestionVO
+        // 为每个房源查询并设置图片列表
+        result.getRecords().forEach(property -> {
+            List<PropertyImage> images = getPropertyImageEntities(property.getId());
+            property.setImageList(images);
+        });
+
+        // 转换为PropertyVO
         Page<PropertyVO> propertyVOPage = new Page<>(pageNum, pageSize, result.getTotal());
         propertyVOPage.setRecords(result.getRecords().stream()
                 .map(Property::toVO)
                 .collect(java.util.stream.Collectors.toList()));
 
-        return propertyVOPage; 
-        // LambdaQueryWrapper<Question> wrapper = new LambdaQueryWrapper<>();
-        // List<Property> properties = propertyMapper.selectList(null);
-        // return properties.stream().map(Property::toVO).collect(Collectors.toList());
+        return propertyVOPage;
     }
     
     @Override
     public List<PropertyVO> listAll() {
         List<Property> properties = propertyMapper.selectList(null);
+        
+        // 为每个房源加载图片信息
+        properties.forEach(property -> {
+            List<PropertyImage> images = getPropertyImageEntities(property.getId());
+            property.setImageList(images);
+        });
+        
         return properties.stream().map(Property::toVO).collect(Collectors.toList());
     }
     
@@ -154,6 +164,12 @@ public class PropertyServiceImpl implements PropertyService{
         // 执行分页查询
         Page<Property> result = propertyMapper.selectPage(propertyPage, wrapper);
 
+        // 为每个房源查询并设置图片列表
+        result.getRecords().forEach(property -> {
+            List<PropertyImage> images = getPropertyImageEntities(property.getId());
+            property.setImageList(images);
+        });
+
         // 转换为PropertyVO
         Page<PropertyVO> propertyVOPage = new Page<>(pageNum, pageSize, result.getTotal());
         propertyVOPage.setRecords(result.getRecords().stream()
@@ -166,7 +182,13 @@ public class PropertyServiceImpl implements PropertyService{
     @Override
     public PropertyVO getById(Long id) {
         Property property = propertyMapper.selectById(id);
-        return property != null ? property.toVO() : null;
+        if (property != null) {
+            // 加载图片信息
+            List<PropertyImage> images = getPropertyImageEntities(property.getId());
+            property.setImageList(images);
+            return property.toVO();
+        }
+        return null;
     }
     
     @Override
@@ -174,6 +196,13 @@ public class PropertyServiceImpl implements PropertyService{
         QueryWrapper<Property> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("seller_id", sellerId);
         List<Property> properties = propertyMapper.selectList(queryWrapper);
+        
+        // 为每个房源加载图片信息
+        properties.forEach(property -> {
+            List<PropertyImage> images = getPropertyImageEntities(property.getId());
+            property.setImageList(images);
+        });
+        
         return properties.stream().map(Property::toVO).collect(Collectors.toList());
     }
     
@@ -270,6 +299,17 @@ public class PropertyServiceImpl implements PropertyService{
         vo.setCreatedAt(propertyImage.getCreatedAt());
         vo.setUpdatedAt(propertyImage.getUpdatedAt());
         return vo;
+    }
+    
+    /**
+     * 获取房源的图片实体列表（内部使用）
+     */
+    private List<PropertyImage> getPropertyImageEntities(Long propertyId) {
+        QueryWrapper<PropertyImage> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("property_id", propertyId);
+        queryWrapper.orderByAsc("created_at");
+        
+        return propertyImageMapper.selectList(queryWrapper);
     }
     
     @Override
