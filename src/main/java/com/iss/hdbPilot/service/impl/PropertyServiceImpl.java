@@ -7,6 +7,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.iss.hdbPilot.model.vo.UserVO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +37,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import com.iss.hdbPilot.model.vo.PropertyImageVO;
 
 @Service
-public class PropertyServiceImpl implements PropertyService{
+public class PropertyServiceImpl extends ServiceImpl<PropertyMapper, Property> implements PropertyService {
     
     @Autowired
     private S3Client s3Client;
@@ -333,4 +337,46 @@ public class PropertyServiceImpl implements PropertyService{
         
         return propertyImageMapper.deleteById(imageId) > 0;
     }
+
+    @Override
+    public Page<PropertyVO> listPendingPropertiesByPage(long current, long size, String keyword) {
+        Page<Property> page = new Page<>(current, size);
+
+        QueryWrapper<Property> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("status", "pending"); // 只筛选待审核
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            String kw = keyword.trim();
+            queryWrapper.and(wrapper ->
+                    wrapper.like("title", kw)
+                            .or()
+                            .like("address", kw)
+            );
+        }
+
+        Page<Property> propertyPage = propertyMapper.selectPage(page, queryWrapper);
+
+        Page<PropertyVO> propertyVOPage = new Page<>();
+        propertyVOPage.setCurrent(current);
+        propertyVOPage.setSize(size);
+        propertyVOPage.setTotal(propertyPage.getTotal());
+
+        List<PropertyVO> voList = propertyPage.getRecords().stream()
+                .map(Property::toVO) // 确保你有 toVO 方法或用 MapStruct 等转换
+                .collect(Collectors.toList());
+        propertyVOPage.setRecords(voList);
+        return propertyVOPage;
+    }
+
+    @Override
+    public Boolean reviewProperty(Long id, Boolean approved) {
+        Property property = new Property();
+        property.setStatus(approved ? "available" : "rejected");
+
+        UpdateWrapper<Property> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("id", id);
+
+        return this.update(property, updateWrapper);
+    }
+
 }
