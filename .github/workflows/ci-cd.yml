@@ -31,6 +31,9 @@ jobs:
         format: 'sarif'
         output: 'trivy-results.sarif'
         severity: 'CRITICAL,HIGH'
+      env:
+        AWS_ACCESS_KEY: test-access-key
+        AWS_SECRET_KEY: test-secret-key
         
     - name: Upload SCA report
       uses: actions/upload-artifact@v4
@@ -55,6 +58,9 @@ jobs:
         config: auto
         output-format: sarif
         output-file: semgrep-report.sarif
+      env:
+        AWS_ACCESS_KEY: test-access-key
+        AWS_SECRET_KEY: test-secret-key
         
     - name: Upload Semgrep report
       uses: actions/upload-artifact@v4
@@ -88,6 +94,10 @@ jobs:
         
     - name: Run tests
       run: ./mvnw clean test
+      env:
+        AWS_ACCESS_KEY: test-access-key
+        AWS_SECRET_KEY: test-secret-key
+        DB_PASSWORD: test-password
       
     - name: Generate test report
       uses: dorny/test-reporter@v1
