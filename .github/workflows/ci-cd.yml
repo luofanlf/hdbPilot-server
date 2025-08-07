@@ -14,31 +14,73 @@ permissions:
   pull-requests: write
 
 jobs:
-  test:
+  # SCA - Software Composition Analysis
+  sca:
     runs-on: ubuntu-latest
-    name: 运行单元测试
+    name: Software Composition Analysis (SCA)
     
     steps:
-    - name: 检出代码
+    - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: 设置 Java 21
+    - name: Setup Java 21
       uses: actions/setup-java@v4
       with:
         java-version: '21'
         distribution: 'temurin'
         
-    - name: 缓存 Maven 依赖
+    - name: Cache Maven dependencies
       uses: actions/cache@v3
       with:
         path: ~/.m2
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
         
-    - name: 运行测试
+    - name: Run OWASP Dependency Check
+      uses: dependency-check/Dependency-Check_Action@main
+      with:
+        project: 'hdbPilot'
+        path: '.'
+        format: 'HTML'
+        out: 'reports'
+        args: >
+          --failOnCVSS 8
+          --enableRetired
+          
+    - name: Upload SCA report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: sca-report
+        path: reports/
+        retention-days: 30
+
+  test:
+    runs-on: ubuntu-latest
+    name: Run Unit Tests
+    needs: sca
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Java 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        
+    - name: Cache Maven dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+        
+    - name: Run tests
       run: ./mvnw clean test
       
-    - name: 生成测试报告
+    - name: Generate test report
       uses: dorny/test-reporter@v1
       if: success() || failure()
       with:
@@ -51,68 +93,61 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    name: 构建并部署到 AWS EC2
+    name: Build and Deploy to AWS EC2
     
     steps:
-    - name: 检出代码
+    - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: 设置 Java 21
+    - name: Setup Java 21
       uses: actions/setup-java@v4
       with:
         java-version: '21'
         distribution: 'temurin'
         
-    - name: 缓存 Maven 依赖
+    - name: Cache Maven dependencies
       uses: actions/cache@v3
       with:
         path: ~/.m2
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
         
-    - name: 构建应用
+    - name: Build application
       run: ./mvnw clean package -DskipTests
       
-    - name: 登录 Docker Hub
+    - name: Login to Docker Hub
       uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         
-    - name: 确保 Docker Hub 仓库存在
+    - name: Ensure Docker Hub repository exists
       run: |
-        echo "检查并创建 Docker Hub 仓库..."
-        # 尝试拉取镜像来检查仓库是否存在，如果不存在会失败但不影响后续步骤
-        docker pull ${{ secrets.DOCKER_USERNAME }}/hdbpilot:latest || echo "仓库不存在，将在首次推送时自动创建"
+        echo "Checking and creating Docker Hub repository..."
+        docker pull ${{ secrets.DOCKER_USERNAME }}/hdbpilot:latest || echo "Repository does not exist, will be created on first push"
         
-    - name: 构建并推送 Docker 镜像
+    - name: Build and push Docker image
       run: |
-        # 构建镜像
         docker build -t ${{ secrets.DOCKER_USERNAME }}/hdbpilot:latest .
-        
-        # 为同一镜像添加额外标签
         docker tag ${{ secrets.DOCKER_USERNAME }}/hdbpilot:latest ${{ secrets.DOCKER_USERNAME }}/hdbpilot:${{ github.sha }}
-        
-        # 推送镜像
         docker push ${{ secrets.DOCKER_USERNAME }}/hdbpilot:latest
         docker push ${{ secrets.DOCKER_USERNAME }}/hdbpilot:${{ github.sha }}
         
-        
-    - name: 🔧 测试 SSH 连接
+    - name: Test SSH connection
       run: |
-        echo "=== 准备私钥文件 ==="
+        echo "=== Preparing private key file ==="
         echo "$EC2_PRIVATE_KEY" > /tmp/debug_key
         chmod 600 /tmp/debug_key
-        echo "私钥文件已创建"
+        echo "Private key file created"
         
-        echo "=== 尝试 SSH 连接 ==="
+        echo "=== Testing SSH connection ==="
         ssh -i /tmp/debug_key \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
             -o ConnectTimeout=10 \
             -vvv \
             $EC2_USERNAME@$EC2_HOST \
-            "echo 'SSH连接成功'; whoami; pwd" || echo "SSH 连接失败"
+            "echo 'SSH connection successful'; whoami; pwd" || echo "SSH connection failed"
         
         rm -f /tmp/debug_key
       env:
@@ -120,7 +155,7 @@ jobs:
         EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
         EC2_PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
         
-    - name: 部署到 AWS EC2
+    - name: Deploy to AWS EC2
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.EC2_HOST }}
@@ -128,14 +163,9 @@ jobs:
         key: ${{ secrets.EC2_PRIVATE_KEY }}
         port: ${{ secrets.EC2_PORT || 22 }}
         script: |
-          # 停止现有容器
           docker stop hdbpilot || true
           docker rm hdbpilot || true
-          
-          # 拉取最新镜像
           docker pull ${{ secrets.DOCKER_USERNAME }}/hdbpilot:latest
-          
-          # 运行新容器
           docker run -d \
             --name hdbpilot \
             --network app-network \
@@ -143,6 +173,4 @@ jobs:
             -p 8080:8080 \
             -e SPRING_PROFILES_ACTIVE=prod \
             ${{ secrets.DOCKER_USERNAME }}/hdbpilot:latest
-          
-          # 清理未使用的镜像
           docker image prune -f 
