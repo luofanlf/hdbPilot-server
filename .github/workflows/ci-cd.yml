@@ -40,10 +40,34 @@ jobs:
         path: trivy-results.sarif
         retention-days: 30
 
+  # SAST - Static Application Security Testing
+  sast:
+    runs-on: ubuntu-latest
+    name: Semgrep Static Code Scanning (SAST)
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install Semgrep
+      run: |
+        python3 -m pip install semgrep
+        
+    - name: Run Semgrep scan
+      run: semgrep --config=auto --output=semgrep-report.sarif --sarif
+      
+    - name: Upload Semgrep report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: semgrep-report
+        path: semgrep-report.sarif
+        retention-days: 30
+
   test:
     runs-on: ubuntu-latest
     name: Run Unit Tests
-    needs: sca
+    needs: [sca, sast]
     
     steps:
     - name: Checkout code
