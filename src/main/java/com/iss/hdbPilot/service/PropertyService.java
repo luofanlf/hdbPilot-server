@@ -1,13 +1,11 @@
 package com.iss.hdbPilot.service;
 
 import java.util.List;
+
+import com.iss.hdbPilot.model.dto.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.iss.hdbPilot.model.dto.PageRequest;
-import com.iss.hdbPilot.model.dto.PropertyAddForm;
-import com.iss.hdbPilot.model.dto.PropertyAddRequest;
-import com.iss.hdbPilot.model.dto.PropertyQueryRequest;
 import com.iss.hdbPilot.model.vo.PropertyVO;
 import com.iss.hdbPilot.model.vo.PropertyImageVO;
 
@@ -69,15 +67,15 @@ public interface PropertyService {
 
     /**
      *
-     * @param current
-     * @param size
-     * @param keyword
+     * @param pageNum
+     * @param pageSize
+     * @param filter
      * @return
      */
-    Page<PropertyVO> listPendingPropertiesByPage(long current, long size, String keyword);
+    Page<PropertyVO> listPendingPropertiesByPage(long pageNum, long pageSize, PropertyFilterRequest filter);
+
 
     /**
-     *
      * @param id
      * @param approved
      * @return
