@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS comment (
 );
 
 ALTER TABLE comment ADD COLUMN property_id BIGINT;
+ALTER TABLE comment ADD COLUMN user_id BIGINT;
 
 
 
