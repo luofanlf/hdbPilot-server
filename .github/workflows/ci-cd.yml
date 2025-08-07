@@ -191,7 +191,8 @@ jobs:
             --network app-network \
             --restart unless-stopped \
             -p 8080:8080 \
-            -v /home/***/hdbpilot-logs:/logs \
+            -v /home/ubuntu/hdbpilot-logs:/logs \
+            -v /home/ubuntu/application-prod.yml:/config/application-prod.yml \
             -e SPRING_PROFILES_ACTIVE=prod \
             -e DB_USERNAME='${{ secrets.DB_USERNAME }}' \
             -e DB_PASSWORD='${{ secrets.DB_PASSWORD }}' \
