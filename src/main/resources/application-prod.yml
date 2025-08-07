@@ -16,8 +16,6 @@ spring:
     username: ${DB_USERNAME:}
     password: ${DB_PASSWORD:}
     driver-class-name: com.mysql.cj.jdbc.Driver
-  profiles:
-    active: prod
   servlet:
     multipart:
       max-file-size: ${MAX_FILE_SIZE:10MB}
