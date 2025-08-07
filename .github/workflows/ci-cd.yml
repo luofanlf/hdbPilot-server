@@ -32,12 +32,6 @@ jobs:
         output: 'trivy-results.sarif'
         severity: 'CRITICAL,HIGH'
         
-    - name: Upload Trivy scan results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v3
-      if: always()
-      with:
-        sarif_file: 'trivy-results.sarif'
-        
     - name: Upload SCA report
       uses: actions/upload-artifact@v4
       if: always()
