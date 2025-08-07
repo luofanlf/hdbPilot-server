@@ -205,10 +205,11 @@ jobs:
           docker ps -a | grep hdbpilot
           
           # 验证容器是否正在运行
-          if docker ps | grep -q hdbpilot; then
-            echo "✅ Docker容器启动成功"
+          if docker ps --filter "name=hdbpilot" --filter "status=running" | grep -q hdbpilot; then
+              echo "✅ Docker容器(hdbpilot)启动成功"
           else
-            echo "❌ Docker容器启动失败"
-            docker logs hdbpilot
-            exit 1
-          fi 
+              echo "❌ Docker容器(hdbpilot)启动失败"
+              # 尝试打印日志，此时因为 run 失败，可能会报错 "No such container"
+              docker logs hdbpilot || echo "无法获取日志，容器可能从未成功创建。"
+              exit 1
+          fi
