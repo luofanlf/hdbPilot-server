@@ -23,42 +23,27 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Setup Java 21
-      uses: actions/setup-java@v4
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
       with:
-        java-version: '21'
-        distribution: 'temurin'
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        severity: 'CRITICAL,HIGH'
         
-    - name: Cache Maven dependencies
-      uses: actions/cache@v3
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
       with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-m2
+        sarif_file: 'trivy-results.sarif'
         
-    - name: Set JAVA_HOME
-      run: |
-        echo "JAVA_HOME=$JAVA_HOME" >> $GITHUB_ENV
-        echo "Current JAVA_HOME: $JAVA_HOME"
-        java -version
-        
-    - name: Run OWASP Dependency Check
-      uses: dependency-check/Dependency-Check_Action@main
-      with:
-        project: 'hdbPilot'
-        path: '.'
-        format: 'HTML'
-        out: 'reports'
-        args: >
-          --failOnCVSS 8
-          --enableRetired
-          
     - name: Upload SCA report
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: sca-report
-        path: reports/
+        name: trivy-report
+        path: trivy-results.sarif
         retention-days: 30
 
   test:
