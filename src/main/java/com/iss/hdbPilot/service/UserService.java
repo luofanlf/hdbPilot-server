@@ -3,11 +3,14 @@ package com.iss.hdbPilot.service;
 import javax.servlet.http.HttpServletRequest;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.iss.hdbPilot.model.dto.AdminUserUpdateRequest;
 import com.iss.hdbPilot.model.entity.User;
 import com.iss.hdbPilot.model.vo.UserVO;
 
-public interface UserService {
+import java.util.List;
 
+public interface UserService {
+    
 
     /**
      * 用户登录
@@ -27,7 +30,7 @@ public interface UserService {
      * @return
      */
     Long adminLogin(String username,String password,HttpServletRequest request);
-
+    
     /**
      * 用户注册
      * @param username
@@ -58,7 +61,7 @@ public interface UserService {
      * @param size the number of users per page
      * @return a page of UserVO objects representing the users
      */
-    Page<UserVO> listUsersByPage(long current, long size);
+    Page<UserVO> listUsersByPage(long current, long size, String keyword);
 
     /**
      * Deletes a user by their ID. Typically used by an administrator.
@@ -68,7 +71,11 @@ public interface UserService {
      */
     boolean removeUserById(Long userId);
 
-    // ======================== 新增的用户自我管理方法 ========================
+    boolean removeUsersByIds(List<Long> userIds);
+
+    boolean updateUser(AdminUserUpdateRequest request);
+
+// ======================== 新增的用户自我管理方法 ========================
     /**
      * 更新用户的用户名
      * @param userId 用户的ID

@@ -7,6 +7,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.iss.hdbPilot.model.vo.UserVO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +37,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import com.iss.hdbPilot.model.vo.PropertyImageVO;
 
 @Service
-public class PropertyServiceImpl implements PropertyService{
+public class PropertyServiceImpl extends ServiceImpl<PropertyMapper, Property> implements PropertyService {
     
     @Autowired
     private S3Client s3Client;
@@ -47,30 +51,40 @@ public class PropertyServiceImpl implements PropertyService{
         int pageNum = pageRequest.getPageNum();
         int pageSize = pageRequest.getPageSize();
 
-        // 构造分页对象 - 先查询Question实体
-        Page<Property> questionPage = new Page<>(pageNum, pageSize);
+        // 构造分页对象 - 先查询Property实体
+        Page<Property> propertyPage = new Page<>(pageNum, pageSize);
 
         // 构造查询条件
         LambdaQueryWrapper<Property> wrapper = new LambdaQueryWrapper<>();
 
         // 执行分页查询
-        Page<Property> result = propertyMapper.selectPage(questionPage, wrapper);
+        Page<Property> result = propertyMapper.selectPage(propertyPage, wrapper);
 
-        // 转换为QuestionVO
+        // 为每个房源查询并设置图片列表
+        result.getRecords().forEach(property -> {
+            List<PropertyImage> images = getPropertyImageEntities(property.getId());
+            property.setImageList(images);
+        });
+
+        // 转换为PropertyVO
         Page<PropertyVO> propertyVOPage = new Page<>(pageNum, pageSize, result.getTotal());
         propertyVOPage.setRecords(result.getRecords().stream()
                 .map(Property::toVO)
                 .collect(java.util.stream.Collectors.toList()));
 
-        return propertyVOPage; 
-        // LambdaQueryWrapper<Question> wrapper = new LambdaQueryWrapper<>();
-        // List<Property> properties = propertyMapper.selectList(null);
-        // return properties.stream().map(Property::toVO).collect(Collectors.toList());
+        return propertyVOPage;
     }
     
     @Override
     public List<PropertyVO> listAll() {
         List<Property> properties = propertyMapper.selectList(null);
+        
+        // 为每个房源加载图片信息
+        properties.forEach(property -> {
+            List<PropertyImage> images = getPropertyImageEntities(property.getId());
+            property.setImageList(images);
+        });
+        
         return properties.stream().map(Property::toVO).collect(Collectors.toList());
     }
     
@@ -154,6 +168,12 @@ public class PropertyServiceImpl implements PropertyService{
         // 执行分页查询
         Page<Property> result = propertyMapper.selectPage(propertyPage, wrapper);
 
+        // 为每个房源查询并设置图片列表
+        result.getRecords().forEach(property -> {
+            List<PropertyImage> images = getPropertyImageEntities(property.getId());
+            property.setImageList(images);
+        });
+
         // 转换为PropertyVO
         Page<PropertyVO> propertyVOPage = new Page<>(pageNum, pageSize, result.getTotal());
         propertyVOPage.setRecords(result.getRecords().stream()
@@ -166,7 +186,13 @@ public class PropertyServiceImpl implements PropertyService{
     @Override
     public PropertyVO getById(Long id) {
         Property property = propertyMapper.selectById(id);
-        return property != null ? property.toVO() : null;
+        if (property != null) {
+            // 加载图片信息
+            List<PropertyImage> images = getPropertyImageEntities(property.getId());
+            property.setImageList(images);
+            return property.toVO();
+        }
+        return null;
     }
     
     @Override
@@ -174,6 +200,13 @@ public class PropertyServiceImpl implements PropertyService{
         QueryWrapper<Property> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("seller_id", sellerId);
         List<Property> properties = propertyMapper.selectList(queryWrapper);
+        
+        // 为每个房源加载图片信息
+        properties.forEach(property -> {
+            List<PropertyImage> images = getPropertyImageEntities(property.getId());
+            property.setImageList(images);
+        });
+        
         return properties.stream().map(Property::toVO).collect(Collectors.toList());
     }
     
@@ -272,6 +305,17 @@ public class PropertyServiceImpl implements PropertyService{
         return vo;
     }
     
+    /**
+     * 获取房源的图片实体列表（内部使用）
+     */
+    private List<PropertyImage> getPropertyImageEntities(Long propertyId) {
+        QueryWrapper<PropertyImage> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("property_id", propertyId);
+        queryWrapper.orderByAsc("created_at");
+        
+        return propertyImageMapper.selectList(queryWrapper);
+    }
+    
     @Override
     public PropertyImageVO addPropertyImage(Long propertyId, MultipartFile imageFile) {
         // 检查房源是否存在
@@ -333,4 +377,46 @@ public class PropertyServiceImpl implements PropertyService{
         
         return propertyImageMapper.deleteById(imageId) > 0;
     }
+
+    @Override
+    public Page<PropertyVO> listPendingPropertiesByPage(long current, long size, String keyword) {
+        Page<Property> page = new Page<>(current, size);
+
+        QueryWrapper<Property> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("status", "pending"); // 只筛选待审核
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            String kw = keyword.trim();
+            queryWrapper.and(wrapper ->
+                    wrapper.like("title", kw)
+                            .or()
+                            .like("address", kw)
+            );
+        }
+
+        Page<Property> propertyPage = propertyMapper.selectPage(page, queryWrapper);
+
+        Page<PropertyVO> propertyVOPage = new Page<>();
+        propertyVOPage.setCurrent(current);
+        propertyVOPage.setSize(size);
+        propertyVOPage.setTotal(propertyPage.getTotal());
+
+        List<PropertyVO> voList = propertyPage.getRecords().stream()
+                .map(Property::toVO) // 确保你有 toVO 方法或用 MapStruct 等转换
+                .collect(Collectors.toList());
+        propertyVOPage.setRecords(voList);
+        return propertyVOPage;
+    }
+
+    @Override
+    public Boolean reviewProperty(Long id, Boolean approved) {
+        Property property = new Property();
+        property.setStatus(approved ? "available" : "rejected");
+
+        UpdateWrapper<Property> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("id", id);
+
+        return this.update(property, updateWrapper);
+    }
+
 }

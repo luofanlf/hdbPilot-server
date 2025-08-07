@@ -66,4 +66,21 @@ public interface PropertyService {
      * 删除房源
      */
     boolean delete(Long id);
+
+    /**
+     *
+     * @param current
+     * @param size
+     * @param keyword
+     * @return
+     */
+    Page<PropertyVO> listPendingPropertiesByPage(long current, long size, String keyword);
+
+    /**
+     *
+     * @param id
+     * @param approved
+     * @return
+     */
+    Boolean reviewProperty(Long id, Boolean approved);
 }
