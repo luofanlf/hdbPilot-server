@@ -49,13 +49,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Install Semgrep
-      run: |
-        python3 -m pip install semgrep
+    - name: Install and run Semgrep scan
+      uses: returntocorp/semgrep-action@v1
+      with:
+        config: auto
+        output-format: sarif
+        output-file: semgrep-report.sarif
         
-    - name: Run Semgrep scan
-      run: semgrep --config=auto --output=semgrep-report.sarif --sarif
-      
     - name: Upload Semgrep report
       uses: actions/upload-artifact@v4
       if: always()
