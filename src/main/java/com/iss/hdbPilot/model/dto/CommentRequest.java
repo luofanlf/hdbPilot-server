@@ -11,5 +11,6 @@ public class CommentRequest {
     private Integer rating;
     private String content;
     private Long propertyId;
+    private Long userId;
 }
 

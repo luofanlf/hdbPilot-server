@@ -59,6 +59,10 @@ CREATE TABLE IF NOT EXISTS comment (
                                        CONSTRAINT fk_comment_property FOREIGN KEY (property_id) REFERENCES property(id) ON DELETE CASCADE
 );
 
+ALTER TABLE comment ADD COLUMN property_id BIGINT;
+ALTER TABLE comment ADD COLUMN user_id BIGINT;
+
+
 
 -- property_image table
 CREATE TABLE IF NOT EXISTS property_image (

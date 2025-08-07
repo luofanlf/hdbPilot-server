@@ -29,6 +29,7 @@ public class CommentController {
         comment.setContent(request.getContent());
         comment.setPropertyId(request.getPropertyId());
         comment.setCreatedAt(LocalDateTime.now());
+        comment.setUserId(request.getUserId());
 
         commentService.submitComment(comment);
 
