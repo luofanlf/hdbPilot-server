@@ -29,7 +29,10 @@ mybatis-plus:
 
 # 生产环境特定配置
 logging:
+  file:
+    name: /logs/hdbpilot.log
   level:
+    root: INFO
     com.iss.hdbPilot: INFO
     org.springframework: WARN
     org.apache.ibatis: WARN
