@@ -191,11 +191,6 @@ jobs:
             --restart unless-stopped \
             -p 8080:8080 \
             -e SPRING_PROFILES_ACTIVE=prod \
-            -e AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} \
-            -e AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }} \
-            -e DB_USERNAME=${{ secrets.DB_USERNAME }} \
-            -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-            -e DB_URL=${{ secrets.DB_URL }} \
             ${{ secrets.DOCKER_USERNAME }}/hdbpilot:latest
           docker image prune -f
           
