@@ -197,4 +197,18 @@ jobs:
             -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
             -e DB_URL=${{ secrets.DB_URL }} \
             ${{ secrets.DOCKER_USERNAME }}/hdbpilot:latest
-          docker image prune -f 
+          docker image prune -f
+          
+          # 健康检查 - 检查容器状态
+          echo "=== 检查Docker容器状态 ==="
+          sleep 10
+          docker ps -a | grep hdbpilot
+          
+          # 验证容器是否正在运行
+          if docker ps | grep -q hdbpilot; then
+            echo "✅ Docker容器启动成功"
+          else
+            echo "❌ Docker容器启动失败"
+            docker logs hdbpilot
+            exit 1
+          fi 
