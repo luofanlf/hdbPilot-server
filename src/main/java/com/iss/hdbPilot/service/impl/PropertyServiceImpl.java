@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.iss.hdbPilot.model.dto.*;
 import com.iss.hdbPilot.model.vo.UserVO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -22,10 +23,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.iss.hdbPilot.mapper.PropertyImageMapper;
 import com.iss.hdbPilot.mapper.PropertyMapper;
-import com.iss.hdbPilot.model.dto.PageRequest;
-import com.iss.hdbPilot.model.dto.PropertyAddForm;
-import com.iss.hdbPilot.model.dto.PropertyAddRequest;
-import com.iss.hdbPilot.model.dto.PropertyQueryRequest;
 import com.iss.hdbPilot.model.entity.Property;
 import com.iss.hdbPilot.model.entity.PropertyImage;
 import com.iss.hdbPilot.model.vo.PropertyVO;
@@ -379,34 +376,57 @@ public class PropertyServiceImpl extends ServiceImpl<PropertyMapper, Property> i
     }
 
     @Override
-    public Page<PropertyVO> listPendingPropertiesByPage(long current, long size, String keyword) {
-        Page<Property> page = new Page<>(current, size);
+    public Page<PropertyVO> listPendingPropertiesByPage(long current, long size, PropertyFilterRequest request) {
+        Page<Property> propertyPage = new Page<>(current, size);
 
-        QueryWrapper<Property> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("status", "pending"); // 只筛选待审核
+        LambdaQueryWrapper<Property> wrapper = new LambdaQueryWrapper<>();
 
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            String kw = keyword.trim();
-            queryWrapper.and(wrapper ->
-                    wrapper.like("title", kw)
-                            .or()
-                            .like("address", kw)
-            );
+        // 添加待审核状态过滤
+        wrapper.eq(Property::getStatus, "PENDING");
+
+        // 过滤条件
+        if (StringUtils.isNotBlank(request.getSellerId())) {
+            wrapper.eq(Property::getSellerId, request.getSellerId());
         }
 
-        Page<Property> propertyPage = propertyMapper.selectPage(page, queryWrapper);
+        if (StringUtils.isNotBlank(request.getAddress())) {
+            wrapper.like(Property::getStreetName, request.getAddress())
+                    .or().like(Property::getBlock, request.getAddress())
+                    .or().like(Property::getPostalCode, request.getAddress());
+        }
 
-        Page<PropertyVO> propertyVOPage = new Page<>();
-        propertyVOPage.setCurrent(current);
-        propertyVOPage.setSize(size);
-        propertyVOPage.setTotal(propertyPage.getTotal());
+        if (StringUtils.isNotBlank(request.getTown())) {
+            wrapper.eq(Property::getTown, request.getTown());
+        }
 
-        List<PropertyVO> voList = propertyPage.getRecords().stream()
-                .map(Property::toVO) // 确保你有 toVO 方法或用 MapStruct 等转换
-                .collect(Collectors.toList());
-        propertyVOPage.setRecords(voList);
-        return propertyVOPage;
+        if (request.getBedroomNumber() != null) {
+            wrapper.eq(Property::getBedroomNumber, request.getBedroomNumber());
+        }
+
+        if (request.getBathroomNumber() != null) {
+            wrapper.eq(Property::getBathroomNumber, request.getBathroomNumber());
+        }
+
+        wrapper.orderByDesc(Property::getUpdatedAt);
+
+        Page<Property> result = propertyMapper.selectPage(propertyPage, wrapper);
+
+        // 加载图片列表
+        result.getRecords().forEach(property -> {
+            List<PropertyImage> images = getPropertyImageEntities(property.getId());
+            property.setImageList(images);
+        });
+
+        // 转换为 VO
+        Page<PropertyVO> voPage = new Page<>(current, size, result.getTotal());
+        voPage.setRecords(result.getRecords().stream()
+                .map(Property::toVO)
+                .collect(Collectors.toList()));
+
+        return voPage;
     }
+
+
 
     @Override
     public Boolean reviewProperty(Long id, Boolean approved) {
