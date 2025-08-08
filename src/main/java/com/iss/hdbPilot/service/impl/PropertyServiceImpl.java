@@ -439,4 +439,42 @@ public class PropertyServiceImpl extends ServiceImpl<PropertyMapper, Property> i
         return this.update(property, updateWrapper);
     }
 
+    @Override
+    public int countAll() {
+        return propertyMapper.selectCount(null).intValue();
+    }
+
+    @Override
+    public int countByStatus(String status) {
+        QueryWrapper<Property> wrapper = new QueryWrapper<>();
+        wrapper.eq("status", status);
+        return propertyMapper.selectCount(wrapper).intValue();
+    }
+
+    @Override
+    public Double calculateListingGrowth() {
+        long thisMonth = propertyMapper.countThisMonth();
+        long lastMonth = propertyMapper.countLastMonth();
+        System.out.println("thisMonth: " + thisMonth);
+        System.out.println("lastMonth: " + lastMonth);
+
+        if (lastMonth == 0) {
+            if (thisMonth == 0) {
+                return 0.0;
+            } else {
+                return 100.0;
+            }
+        }
+        return ((double)(thisMonth - lastMonth) / lastMonth) * 100;
+    }
+
+    public List<MonthlyListingCount> getMonthlyListingCounts(Integer year) {
+        return propertyMapper.getMonthlyListingCounts(year);
+    }
+
+    @Override
+    public List<ListingStatusCount> getStatusDistribution() {
+        return propertyMapper.getStatusDistribution();
+    }
+
 }
