@@ -261,4 +261,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         userToUpdate.setUpdatedAt(LocalDateTime.now());
         return userMapper.updateById(userToUpdate) > 0;
     }
+
+    @Override
+    public long countAllUsers() {
+        return userMapper.selectCount(null);
+    }
 }

@@ -116,4 +116,10 @@ public interface UserService {
      * @return true 如果更新成功，false 如果更新失败
      */
     boolean updateBio(Long userId, String newBio);
+
+    /**
+     *
+     * @return
+     */
+    long countAllUsers();
 }
