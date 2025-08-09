@@ -155,7 +155,7 @@ public class UserController {
     }
 
     @PutMapping("{userId}/avatar")
-    public BaseResponse<Boolean> updateAvatar(@PathVariable Long userId,
+    public BaseResponse<String> updateAvatar(@PathVariable Long userId,
     @RequestParam("imageFile") MultipartFile imageFile) {
         return ResultUtils.success(userService.updateAvatar(userId, imageFile));
     }

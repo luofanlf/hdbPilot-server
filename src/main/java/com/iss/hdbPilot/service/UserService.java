@@ -131,5 +131,5 @@ public interface UserService {
      * @param imageFile
      * @return
      */
-    Boolean updateAvatar(Long userId, MultipartFile imageFile);
+    String updateAvatar(Long userId, MultipartFile imageFile);
 }

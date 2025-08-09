@@ -277,7 +277,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public Boolean updateAvatar(Long userId, MultipartFile imageFile) {
+    public String updateAvatar(Long userId, MultipartFile imageFile) {
         User user = userMapper.selectById(userId);
         if (user == null) {
             throw new RuntimeException("User not found");
@@ -316,6 +316,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new RuntimeException("save image info failed: " + e.getMessage());
         }
         
-        return true;
+        return imageUrl;
     }
 }
