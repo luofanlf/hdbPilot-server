@@ -31,5 +31,9 @@ public interface CommentService {
     void deleteCommentsByIds(List<Long> ids);
     List<CommentVO> getCommentVOsByProperty(Long propertyId);
 
+    List<Comment> getUserComments(Long userId);
+
+    void deleteCommentById(Long commentId);
+
 
 }
