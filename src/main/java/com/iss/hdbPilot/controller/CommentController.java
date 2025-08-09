@@ -112,4 +112,6 @@ public class CommentController {
         return commentService.getCommentVOsByProperty(propertyId);
     }
 
+
+
 }
