@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.ArrayList;
 
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -188,6 +189,23 @@ public class PropertyServiceImpl extends ServiceImpl<PropertyMapper, Property> i
             return property.toVO();
         }
         return null;
+    }
+    
+    @Override
+    public List<PropertyVO> getByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        List<Property> properties = propertyMapper.selectBatchIds(ids);
+        
+        // 为每个房源加载图片信息
+        properties.forEach(property -> {
+            List<PropertyImage> images = getPropertyImageEntities(property.getId());
+            property.setImageList(images);
+        });
+        
+        return properties.stream().map(Property::toVO).collect(Collectors.toList());
     }
     
     @Override
