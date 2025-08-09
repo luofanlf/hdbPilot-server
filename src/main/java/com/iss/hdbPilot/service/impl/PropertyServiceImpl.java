@@ -237,6 +237,8 @@ public class PropertyServiceImpl extends ServiceImpl<PropertyMapper, Property> i
         BeanUtils.copyProperties(form, property);
         property.setCreatedAt(LocalDateTime.now());
         property.setUpdatedAt(LocalDateTime.now());
+        // 设置新上传的房源状态为 pending，等待管理员审查
+        property.setStatus("pending");
         propertyMapper.insert(property);
         
         // 上传多张图片到S3并保存到数据库
