@@ -32,6 +32,11 @@ public interface PropertyService {
     PropertyVO getById(Long id);
     
     /**
+     * 根据ID列表批量获取房源详情
+     */
+    List<PropertyVO> getByIds(List<Long> ids);
+    
+    /**
      * 获取用户发布的房源列表
      */
     List<PropertyVO> getUserProperties(Long sellerId);
