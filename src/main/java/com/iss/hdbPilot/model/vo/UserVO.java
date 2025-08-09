@@ -15,5 +15,7 @@ public class UserVO {
 
     private String bio;
 
+    private String avatarUrl;
+
     private LocalDateTime createdAt;
 }

@@ -2,6 +2,8 @@ package com.iss.hdbPilot.service;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.iss.hdbPilot.model.dto.AdminUserUpdateRequest;
 import com.iss.hdbPilot.model.entity.User;
@@ -122,4 +124,12 @@ public interface UserService {
      * @return
      */
     long countAllUsers();
+
+    /**
+     * 更新用户的头像
+     * @param userId
+     * @param imageFile
+     * @return
+     */
+    String updateAvatar(Long userId, MultipartFile imageFile);
 }
