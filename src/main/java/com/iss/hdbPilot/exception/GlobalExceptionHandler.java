@@ -25,6 +25,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST) // 设置为 400
                 .body(ResultUtils.error(e.getMessage()));
+
     }
 
 

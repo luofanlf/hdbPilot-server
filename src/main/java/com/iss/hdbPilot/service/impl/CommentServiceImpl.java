@@ -47,6 +47,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
 
+
     @Override
     public Double getAverageRating() {
         QueryWrapper<Comment> wrapper = new QueryWrapper<>();
