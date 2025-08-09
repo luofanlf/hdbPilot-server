@@ -53,6 +53,7 @@ jobs:
       uses: returntocorp/semgrep-action@v1
       with:
         config: auto
+        entryPoint: semgrep ci
         args: --sarif --output=semgrep-report.sarif
 
     - name: Upload Semgrep report
