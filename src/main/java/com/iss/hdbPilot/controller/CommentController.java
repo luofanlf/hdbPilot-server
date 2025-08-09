@@ -112,10 +112,7 @@ public class CommentController {
         return commentService.getCommentVOsByProperty(propertyId);
     }
 
-    @GetMapping("/user/{userId}")
-    public List<Comment> getUserComments(@PathVariable Long userId) {
-        return commentService.getUserComments(userId);
-    }
+
 
     @DeleteMapping("/{commentId}")
     public ResponseEntity<Map<String, String>> deleteCommentById(@PathVariable Long commentId) {

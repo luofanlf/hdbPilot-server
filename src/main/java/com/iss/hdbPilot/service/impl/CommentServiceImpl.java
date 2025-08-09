@@ -120,16 +120,5 @@ public class CommentServiceImpl implements CommentService {
         return result;
     }
 
-    @Override
-    public List<Comment> getUserComments(Long userId) {
-        QueryWrapper<Comment> query = new QueryWrapper<>();
-        query.eq("user_id", userId);
-        return commentMapper.selectList(query);
-    }
-
-    @Override
-    public void deleteCommentById(Long commentId) {
-        commentMapper.deleteById(commentId);
-    }
 
 }
