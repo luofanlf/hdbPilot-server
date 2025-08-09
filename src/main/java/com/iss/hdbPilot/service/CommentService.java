@@ -1,6 +1,7 @@
 package com.iss.hdbPilot.service;
 
 import com.iss.hdbPilot.model.entity.Comment;
+import com.iss.hdbPilot.model.vo.CommentVO;
 import java.util.List;
 
 /**
@@ -27,9 +28,8 @@ public interface CommentService {
     Double getAverageRating();
     List<Comment> getCommentsByProperty(Long propertyId);
     Double getAverageRatingByProperty(Long propertyId);
-    List<Comment> getUserComments(Long userId);
     void deleteCommentsByIds(List<Long> ids);
-    void deleteCommentById(Long commentId);
+    List<CommentVO> getCommentVOsByProperty(Long propertyId);
+
 
 }
-
