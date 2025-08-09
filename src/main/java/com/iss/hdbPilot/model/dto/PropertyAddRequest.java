@@ -111,6 +111,6 @@ public class PropertyAddRequest {
      * 状态
      */
     @NotBlank(message = "状态不能为空")
-    @Pattern(regexp = "^(available|sold|pending)$", message = "状态必须是available、sold或pending")
+    @Pattern(regexp = "^(available|sold)$", message = "状态只能是available或sold")
     private String status;
 } 
