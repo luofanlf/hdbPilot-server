@@ -218,7 +218,7 @@ public class PropertySearchTest {
         List<Property> filteredProperties = mockProperties.stream()
             .filter(p -> p.getResalePrice() >= 400000f && p.getResalePrice() <= 600000f)
             .toList();
-
+        
         when(propertyMapper.selectPage(any(), any())).thenReturn(createMockPage(filteredProperties, 1, 10));
 
         Page<PropertyVO> result = propertyService.search(request);
