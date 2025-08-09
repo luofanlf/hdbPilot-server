@@ -6,12 +6,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.ArrayList;
 
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.iss.hdbPilot.model.dto.*;
-import com.iss.hdbPilot.model.vo.UserVO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +52,7 @@ public class PropertyServiceImpl extends ServiceImpl<PropertyMapper, Property> i
 
         // 构造查询条件
         LambdaQueryWrapper<Property> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Property::getStatus, "available");
 
         // 执行分页查询
         Page<Property> result = propertyMapper.selectPage(propertyPage, wrapper);
@@ -74,7 +74,9 @@ public class PropertyServiceImpl extends ServiceImpl<PropertyMapper, Property> i
     
     @Override
     public List<PropertyVO> listAll() {
-        List<Property> properties = propertyMapper.selectList(null);
+        QueryWrapper<Property> wrapper = new QueryWrapper<>();
+        wrapper.eq("status", "available");
+        List<Property> properties = propertyMapper.selectList(wrapper);
         
         // 为每个房源加载图片信息
         properties.forEach(property -> {
@@ -96,6 +98,7 @@ public class PropertyServiceImpl extends ServiceImpl<PropertyMapper, Property> i
         // 构造查询条件
         LambdaQueryWrapper<Property> wrapper = new LambdaQueryWrapper<>();
         
+        wrapper.eq(Property::getStatus, "available");
         // 房源标题模糊查询
         if (StringUtils.isNotBlank(queryRequest.getListingTitle())) {
             wrapper.like(Property::getListingTitle, queryRequest.getListingTitle());
@@ -193,6 +196,23 @@ public class PropertyServiceImpl extends ServiceImpl<PropertyMapper, Property> i
     }
     
     @Override
+    public List<PropertyVO> getByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        List<Property> properties = propertyMapper.selectBatchIds(ids);
+        
+        // 为每个房源加载图片信息
+        properties.forEach(property -> {
+            List<PropertyImage> images = getPropertyImageEntities(property.getId());
+            property.setImageList(images);
+        });
+        
+        return properties.stream().map(Property::toVO).collect(Collectors.toList());
+    }
+    
+    @Override
     public List<PropertyVO> getUserProperties(Long sellerId) {
         QueryWrapper<Property> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("seller_id", sellerId);
@@ -217,6 +237,8 @@ public class PropertyServiceImpl extends ServiceImpl<PropertyMapper, Property> i
         BeanUtils.copyProperties(form, property);
         property.setCreatedAt(LocalDateTime.now());
         property.setUpdatedAt(LocalDateTime.now());
+        // 设置新上传的房源状态为 pending，等待管理员审查
+        property.setStatus("pending");
         propertyMapper.insert(property);
         
         // 上传多张图片到S3并保存到数据库
@@ -437,6 +459,44 @@ public class PropertyServiceImpl extends ServiceImpl<PropertyMapper, Property> i
         updateWrapper.eq("id", id);
 
         return this.update(property, updateWrapper);
+    }
+
+    @Override
+    public int countAll() {
+        return propertyMapper.selectCount(null).intValue();
+    }
+
+    @Override
+    public int countByStatus(String status) {
+        QueryWrapper<Property> wrapper = new QueryWrapper<>();
+        wrapper.eq("status", status);
+        return propertyMapper.selectCount(wrapper).intValue();
+    }
+
+    @Override
+    public Double calculateListingGrowth() {
+        long thisMonth = propertyMapper.countThisMonth();
+        long lastMonth = propertyMapper.countLastMonth();
+        System.out.println("thisMonth: " + thisMonth);
+        System.out.println("lastMonth: " + lastMonth);
+
+        if (lastMonth == 0) {
+            if (thisMonth == 0) {
+                return 0.0;
+            } else {
+                return 100.0;
+            }
+        }
+        return ((double)(thisMonth - lastMonth) / lastMonth) * 100;
+    }
+
+    public List<MonthlyListingCount> getMonthlyListingCounts(Integer year) {
+        return propertyMapper.getMonthlyListingCounts(year);
+    }
+
+    @Override
+    public List<ListingStatusCount> getStatusDistribution() {
+        return propertyMapper.getStatusDistribution();
     }
 
 }

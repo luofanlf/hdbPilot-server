@@ -62,6 +62,7 @@ CREATE TABLE IF NOT EXISTS comment (
 
 
 
+
 -- property_image table
 CREATE TABLE IF NOT EXISTS property_image (
     id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '图片主键',
