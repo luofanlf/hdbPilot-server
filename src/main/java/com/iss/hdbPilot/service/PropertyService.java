@@ -1,6 +1,7 @@
 package com.iss.hdbPilot.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.iss.hdbPilot.model.dto.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,6 +30,11 @@ public interface PropertyService {
      * 根据ID获取房源详情
      */
     PropertyVO getById(Long id);
+    
+    /**
+     * 根据ID列表批量获取房源详情
+     */
+    List<PropertyVO> getByIds(List<Long> ids);
     
     /**
      * 获取用户发布的房源列表
@@ -81,4 +87,32 @@ public interface PropertyService {
      * @return
      */
     Boolean reviewProperty(Long id, Boolean approved);
+
+    /**
+     *
+     * @return
+     */
+    public int countAll();
+
+    /**
+     *
+     * @param status
+     * @return
+     */
+    public int countByStatus(String status);
+
+    /**
+     *
+     * @return
+     */
+    public Double calculateListingGrowth();
+
+    /**
+     *
+     * @return
+     */
+    public List<MonthlyListingCount> getMonthlyListingCounts(Integer year);
+
+    List<ListingStatusCount> getStatusDistribution();
+
 }

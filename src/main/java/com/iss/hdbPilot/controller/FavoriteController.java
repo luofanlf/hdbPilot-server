@@ -42,6 +42,19 @@ public class FavoriteController {
     }
     
     /**
+     * 取消收藏（通过propertyId）
+     */
+    @DeleteMapping("/property/{propertyId}")
+    public BaseResponse<Boolean> removeFavoriteByPropertyId(@RequestParam Long userId, @PathVariable Long propertyId) {
+        boolean success = favoriteService.removeFavoriteByPropertyId(userId, propertyId);
+        if (success) {
+            return ResultUtils.success(true);
+        } else {
+            return new BaseResponse<>(-1, false, "收藏不存在或删除失败");
+        }
+    }
+    
+    /**
      * 获取用户的收藏列表
      */
     @GetMapping("/user/{userId}")
@@ -53,7 +66,7 @@ public class FavoriteController {
      * 检查用户是否已收藏某个房源
      */
     @GetMapping("/check")
-    public BaseResponse<Boolean> isFavorite(@RequestParam Long userId, @RequestParam Long propertyId) {
+    public BaseResponse<FavoriteVO> isFavorite(@RequestParam Long userId, @RequestParam Long propertyId) {
         return ResultUtils.success(favoriteService.isFavorite(userId, propertyId));
     }
     

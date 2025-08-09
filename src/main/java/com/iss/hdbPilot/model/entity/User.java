@@ -46,6 +46,7 @@ public class User {
         userVO.setEmail(this.email);
         userVO.setNickname(this.nickname);
         userVO.setBio(this.bio);
+        userVO.setAvatarUrl(this.avatarUrl);
         userVO.setCreatedAt(this.getCreatedAt());
         return userVO;
     }

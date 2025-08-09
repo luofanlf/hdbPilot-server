@@ -5,8 +5,10 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.iss.hdbPilot.mapper.FavoriteMapper;
 import com.iss.hdbPilot.mapper.PropertyMapper;
+import com.iss.hdbPilot.mapper.PropertyImageMapper;
 import com.iss.hdbPilot.model.entity.Favorite;
 import com.iss.hdbPilot.model.entity.Property;
+import com.iss.hdbPilot.model.entity.PropertyImage;
 import com.iss.hdbPilot.model.dto.FavoriteRequest;
 import com.iss.hdbPilot.model.dto.PageRequest;
 import com.iss.hdbPilot.model.vo.FavoriteVO;
@@ -27,6 +29,9 @@ public class FavoriteServiceImpl implements FavoriteService {
     
     @Autowired
     private PropertyMapper propertyMapper;
+    
+    @Autowired
+    private PropertyImageMapper propertyImageMapper;
     
     @Override
     public FavoriteVO addFavorite(Long userId, FavoriteRequest request) {
@@ -77,6 +82,15 @@ public class FavoriteServiceImpl implements FavoriteService {
     }
     
     @Override
+    public boolean removeFavoriteByPropertyId(Long userId, Long propertyId) {
+        LambdaQueryWrapper<Favorite> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Favorite::getUserId, userId)
+                   .eq(Favorite::getPropertyId, propertyId);
+        
+        return favoriteMapper.delete(queryWrapper) > 0;
+    }
+    
+    @Override
     public Page<FavoriteVO> getUserFavorites(Long userId, PageRequest pageRequest) {
         int pageNum = pageRequest.getPageNum();
         int pageSize = pageRequest.getPageSize();
@@ -102,12 +116,22 @@ public class FavoriteServiceImpl implements FavoriteService {
     }
     
     @Override
-    public boolean isFavorite(Long userId, Long propertyId) {
+    public FavoriteVO isFavorite(Long userId, Long propertyId) {
         LambdaQueryWrapper<Favorite> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Favorite::getUserId, userId)
                    .eq(Favorite::getPropertyId, propertyId);
         
-        return favoriteMapper.selectCount(queryWrapper) > 0;
+        Favorite favorite = favoriteMapper.selectOne(queryWrapper);
+        if (favorite != null) {
+            Property property = propertyMapper.selectById(propertyId);
+            if (property != null) {
+                // 为 Property 加载图片信息
+                List<PropertyImage> images = getPropertyImageEntities(property.getId());
+                property.setImageList(images);
+            }
+            return convertToVO(favorite, property);
+        }
+        return null;
     }
     
     @Override
@@ -139,6 +163,21 @@ public class FavoriteServiceImpl implements FavoriteService {
     
     private FavoriteVO convertToVOWithProperty(Favorite favorite) {
         Property property = propertyMapper.selectById(favorite.getPropertyId());
+        if (property != null) {
+            // 为 Property 加载图片信息
+            List<PropertyImage> images = getPropertyImageEntities(property.getId());
+            property.setImageList(images);
+        }
         return convertToVO(favorite, property);
+    }
+    
+    /**
+     * 获取房源的图片实体列表（内部使用）
+     */
+    private List<PropertyImage> getPropertyImageEntities(Long propertyId) {
+        QueryWrapper<PropertyImage> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("property_id", propertyId);
+        queryWrapper.orderByAsc("created_at");
+        return propertyImageMapper.selectList(queryWrapper);
     }
 } 

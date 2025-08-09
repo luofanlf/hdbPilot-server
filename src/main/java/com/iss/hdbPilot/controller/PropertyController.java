@@ -62,6 +62,15 @@ public class PropertyController {
     }
     
     /**
+     * 根据ID列表批量获取房源详情
+     */
+    @PostMapping("/batch")
+    public BaseResponse<List<PropertyVO>> getByIds(@RequestBody List<Long> ids){
+        List<PropertyVO> properties = propertyService.getByIds(ids);
+        return ResultUtils.success(properties);
+    }
+    
+    /**
      * 创建新房源
      */
     @PostMapping

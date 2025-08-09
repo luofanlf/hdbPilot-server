@@ -22,7 +22,7 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Run Trivy vulnerability scanner
       uses: aquasecurity/trivy-action@master
       with:
@@ -31,10 +31,7 @@ jobs:
         format: 'sarif'
         output: 'trivy-results.sarif'
         severity: 'CRITICAL,HIGH'
-      env:
-        AWS_ACCESS_KEY: test-access-key
-        AWS_SECRET_KEY: test-secret-key
-        
+
     - name: Upload SCA report
       uses: actions/upload-artifact@v4
       if: always()
@@ -47,21 +44,18 @@ jobs:
   sast:
     runs-on: ubuntu-latest
     name: Semgrep Static Code Scanning (SAST)
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
-    - name: Install and run Semgrep scan
+
+    - name: Run Semgrep scan
       uses: returntocorp/semgrep-action@v1
       with:
         config: auto
-        output-format: sarif
-        output-file: semgrep-report.sarif
-      env:
-        AWS_ACCESS_KEY: test-access-key
-        AWS_SECRET_KEY: test-secret-key
-        
+        entryPoint: semgrep
+        args: ci --sarif --output=semgrep-report.sarif
+
     - name: Upload Semgrep report
       uses: actions/upload-artifact@v4
       if: always()

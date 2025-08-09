@@ -11,14 +11,21 @@ import com.iss.hdbPilot.model.vo.UserVO;
 import com.iss.hdbPilot.service.UserService;
 
 import lombok.extern.slf4j.Slf4j;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 
@@ -28,6 +35,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private S3Client s3Client;
 
     @Override
     public Long login(String username,String password,HttpServletRequest request) {
@@ -260,5 +269,53 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         userToUpdate.setBio(newBio);
         userToUpdate.setUpdatedAt(LocalDateTime.now());
         return userMapper.updateById(userToUpdate) > 0;
+    }
+
+    @Override
+    public long countAllUsers() {
+        return userMapper.selectCount(null);
+    }
+
+    @Override
+    public String updateAvatar(Long userId, MultipartFile imageFile) {
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+        
+        // 构建图片名并上传到s3
+        String imageName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
+        try {
+            System.out.println("开始上传图片到S3: " + imageName);
+            s3Client.putObject(
+                PutObjectRequest.builder()
+                    .bucket("hdb-pilot")
+                    .key(imageName)
+                    .contentType(imageFile.getContentType())
+                    .build(),
+                RequestBody.fromInputStream(imageFile.getInputStream(), imageFile.getSize())
+            );
+            System.out.println("图片上传到S3成功: " + imageName);
+        } catch (Exception e) {
+            System.err.println("图片上传到S3失败: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("upload image failed: " + e.getMessage());
+        }
+
+        // 构建图片url并插入数据库
+        String imageUrl = "https://hdb-pilot.s3.ap-southeast-1.amazonaws.com/" + URLEncoder.encode(imageName, StandardCharsets.UTF_8);
+        
+        user.setAvatarUrl(imageUrl);
+        
+        try {
+            userMapper.updateById(user);
+            System.out.println("图片信息保存到数据库成功: " + imageUrl);
+        } catch (Exception e) {
+            System.err.println("图片信息保存到数据库失败: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("save image info failed: " + e.getMessage());
+        }
+        
+        return imageUrl;
     }
 }

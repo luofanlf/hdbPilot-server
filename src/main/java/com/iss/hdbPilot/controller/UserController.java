@@ -3,6 +3,8 @@ package com.iss.hdbPilot.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.iss.hdbPilot.common.BaseResponse;
 import com.iss.hdbPilot.common.ResultUtils;
 import com.iss.hdbPilot.model.dto.UserLoginRequest;
@@ -151,4 +153,11 @@ public class UserController {
 
         return ResultUtils.error(400, "No valid fields provided for update.");
     }
+
+    @PutMapping("{userId}/avatar")
+    public BaseResponse<String> updateAvatar(@PathVariable Long userId,
+    @RequestParam("imageFile") MultipartFile imageFile) {
+        return ResultUtils.success(userService.updateAvatar(userId, imageFile));
+    }
+
 }
