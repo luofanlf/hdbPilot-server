@@ -2,6 +2,7 @@ package com.iss.hdbPilot.controller;
 
 import com.iss.hdbPilot.model.dto.CommentRequest;
 import com.iss.hdbPilot.model.entity.Comment;
+import com.iss.hdbPilot.model.vo.CommentVO;
 import com.iss.hdbPilot.service.CommentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -64,6 +65,11 @@ public class CommentController {
         }
         commentService.deleteCommentsByIds(ids);
         return ResponseEntity.ok(Map.of("message", "Comments deleted successfully"));
+    }
+
+    @GetMapping("/property/{propertyId}/with-username")
+    public List<CommentVO> getCommentVOsByProperty(@PathVariable Long propertyId) {
+        return commentService.getCommentVOsByProperty(propertyId);
     }
 
 }

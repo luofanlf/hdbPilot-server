@@ -53,13 +53,13 @@ INSERT INTO property (listing_title, seller_id, town, postal_code, bedroom_numbe
 CREATE TABLE IF NOT EXISTS comment (
                                        id BIGINT PRIMARY KEY AUTO_INCREMENT,
                                        property_id BIGINT NOT NULL,
+                                       user_id BIGINT NOT NULL,
                                        rating INT NOT NULL,
                                        content TEXT,
                                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                                        CONSTRAINT fk_comment_property FOREIGN KEY (property_id) REFERENCES property(id) ON DELETE CASCADE
 );
 
-ALTER TABLE comment ADD COLUMN user_id BIGINT;
 
 
 

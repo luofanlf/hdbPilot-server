@@ -5,7 +5,14 @@ import com.iss.hdbPilot.mapper.CommentMapper;
 import com.iss.hdbPilot.service.CommentService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.stereotype.Service;
+import com.iss.hdbPilot.mapper.PropertyMapper;
+import com.iss.hdbPilot.model.entity.Property;
+import com.iss.hdbPilot.exception.BusinessException;
+import com.iss.hdbPilot.mapper.UserMapper;
+import com.iss.hdbPilot.model.entity.User;
+import com.iss.hdbPilot.model.vo.CommentVO;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -15,14 +22,22 @@ import java.util.List;
 public class CommentServiceImpl implements CommentService {
 
     private final CommentMapper commentMapper;
+    private final PropertyMapper propertyMapper;
+    private final UserMapper userMapper;
 
     // 构造函数注入
-    public CommentServiceImpl(CommentMapper commentMapper) {
+    public CommentServiceImpl(CommentMapper commentMapper, PropertyMapper propertyMapper, UserMapper userMapper) {
         this.commentMapper = commentMapper;
+        this.propertyMapper = propertyMapper;
+        this.userMapper = userMapper;
     }
 
     @Override
     public void submitComment(Comment comment) {
+        Property property = propertyMapper.selectById(comment.getPropertyId());
+        if (property != null && property.getSellerId() != null && property.getSellerId().equals(comment.getUserId())) {
+            throw new BusinessException("You cannot comment on your own property.");
+        }
         commentMapper.insert(comment);
     }
 
@@ -66,6 +81,24 @@ public class CommentServiceImpl implements CommentService {
         QueryWrapper<Comment> query = new QueryWrapper<>();
         query.in("id", ids);
         commentMapper.delete(query);
+    }
+
+    @Override
+    public List<CommentVO> getCommentVOsByProperty(Long propertyId) {
+        List<Comment> comments = getCommentsByProperty(propertyId);
+        List<CommentVO> result = new ArrayList<>();
+        for (Comment c : comments) {
+            User user = userMapper.selectById(c.getUserId());
+            CommentVO vo = new CommentVO();
+            vo.setId(c.getId());
+            vo.setPropertyId(c.getPropertyId());
+            vo.setUsername(user != null ? user.getUsername() : "Unknown");
+            vo.setRating(c.getRating());
+            vo.setContent(c.getContent());
+            vo.setCreatedAt(c.getCreatedAt());
+            result.add(vo);
+        }
+        return result;
     }
 
 }
