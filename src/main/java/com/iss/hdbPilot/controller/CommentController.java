@@ -114,9 +114,4 @@ public class CommentController {
 
 
 
-    @DeleteMapping("/{commentId}")
-    public ResponseEntity<Map<String, String>> deleteCommentById(@PathVariable Long commentId) {
-        commentService.deleteCommentById(commentId);
-        return ResponseEntity.ok(Map.of("message", "Comment deleted successfully"));
-    }
 }
