@@ -3,15 +3,12 @@ package com.iss.hdbPilot.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.iss.hdbPilot.common.BaseResponse;
 import com.iss.hdbPilot.common.ResultUtils;
-import com.iss.hdbPilot.model.dto.PageRequest;
 import com.iss.hdbPilot.model.dto.PropertyFilterRequest;
-import com.iss.hdbPilot.model.dto.PropertyQueryRequest;
 import com.iss.hdbPilot.model.vo.PropertyVO;
 import com.iss.hdbPilot.service.PropertyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.Map;
 
 @RestController
