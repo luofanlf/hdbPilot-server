@@ -51,6 +51,7 @@ public class PropertyServiceImpl extends ServiceImpl<PropertyMapper, Property> i
 
         // 构造查询条件
         LambdaQueryWrapper<Property> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Property::getStatus, "available");
 
         // 执行分页查询
         Page<Property> result = propertyMapper.selectPage(propertyPage, wrapper);
@@ -72,7 +73,9 @@ public class PropertyServiceImpl extends ServiceImpl<PropertyMapper, Property> i
     
     @Override
     public List<PropertyVO> listAll() {
-        List<Property> properties = propertyMapper.selectList(null);
+        QueryWrapper<Property> wrapper = new QueryWrapper<>();
+        wrapper.eq("status", "available");
+        List<Property> properties = propertyMapper.selectList(wrapper);
         
         // 为每个房源加载图片信息
         properties.forEach(property -> {
@@ -94,6 +97,7 @@ public class PropertyServiceImpl extends ServiceImpl<PropertyMapper, Property> i
         // 构造查询条件
         LambdaQueryWrapper<Property> wrapper = new LambdaQueryWrapper<>();
         
+        wrapper.eq(Property::getStatus, "available");
         // 房源标题模糊查询
         if (StringUtils.isNotBlank(queryRequest.getListingTitle())) {
             wrapper.like(Property::getListingTitle, queryRequest.getListingTitle());

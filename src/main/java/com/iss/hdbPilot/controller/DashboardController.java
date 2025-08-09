@@ -1,6 +1,6 @@
 package com.iss.hdbPilot.controller;
 
-import com.iss.hdbPilot.model.dto.DashboardStatsResponse;
+
 import com.iss.hdbPilot.model.dto.ListingStatusCount;
 import com.iss.hdbPilot.model.dto.MonthlyListingCount;
 import com.iss.hdbPilot.service.PropertyService;
