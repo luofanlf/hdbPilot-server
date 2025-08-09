@@ -25,6 +25,11 @@ public interface FavoriteService {
     boolean removeFavoriteById(Long userId, Long favoriteId);
     
     /**
+     * 取消收藏（通过propertyId，新增方法）
+     */
+    boolean removeFavoriteByPropertyId(Long userId, Long propertyId);
+    
+    /**
      * 获取用户的收藏列表
      */
     Page<FavoriteVO> getUserFavorites(Long userId, PageRequest pageRequest);
@@ -32,7 +37,7 @@ public interface FavoriteService {
     /**
      * 检查用户是否已收藏某个房源
      */
-    boolean isFavorite(Long userId, Long propertyId);
+    FavoriteVO isFavorite(Long userId, Long propertyId);
     
     /**
      * 获取用户收藏的房源ID列表

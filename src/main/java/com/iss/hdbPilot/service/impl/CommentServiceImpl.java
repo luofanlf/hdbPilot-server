@@ -72,6 +72,14 @@ public class CommentServiceImpl implements CommentService {
         if (comments.isEmpty()) return 0.0;
         return comments.stream().mapToInt(Comment::getRating).average().orElse(0.0);
     }
+    
+    @Override
+    public List<Comment> getUserComments(Long userId) {
+        QueryWrapper<Comment> query = new QueryWrapper<>();
+        query.eq("user_id", userId)
+             .orderByDesc("created_at");
+        return commentMapper.selectList(query);
+    }
 
     @Override
     public void deleteCommentsByIds(List<Long> ids) {
@@ -80,6 +88,16 @@ public class CommentServiceImpl implements CommentService {
         }
         QueryWrapper<Comment> query = new QueryWrapper<>();
         query.in("id", ids);
+        commentMapper.delete(query);
+    }
+    
+    @Override
+    public void deleteCommentById(Long commentId) {
+        if (commentId == null) {
+            return;
+        }
+        QueryWrapper<Comment> query = new QueryWrapper<>();
+        query.eq("id", commentId);
         commentMapper.delete(query);
     }
 
