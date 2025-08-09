@@ -4,9 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.iss.hdbPilot.mapper.UserMapper;
+import com.iss.hdbPilot.mapper.*;
 import com.iss.hdbPilot.model.dto.AdminUserUpdateRequest;
-import com.iss.hdbPilot.model.entity.User;
+import com.iss.hdbPilot.model.entity.*;
 import com.iss.hdbPilot.model.vo.UserVO;
 import com.iss.hdbPilot.service.UserService;
 
@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -35,6 +36,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private PropertyMapper propertyMapper;
+    @Autowired
+    private PropertyImageMapper propertyImageMapper;
+    @Autowired
+    private CommentMapper commentMapper;
+    @Autowired
+    private FavoriteMapper favoriteMapper;
     @Autowired
     private S3Client s3Client;
 
@@ -175,15 +184,54 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
 
     @Override
+    @Transactional
     public boolean removeUserById(Long userId) {
         if (userId == null || userId <= 0) {
             throw new IllegalArgumentException("User ID is illegal");
         }
+        commentMapper.delete(new QueryWrapper<Comment>().eq("user_id", userId));
+
+        List<Long> propertyIds = propertyMapper.selectList(
+                new QueryWrapper<Property>().eq("seller_id", userId)
+        ).stream().map(Property::getId).collect(Collectors.toList());
+
+        if (!propertyIds.isEmpty()) {
+            propertyImageMapper.delete(new QueryWrapper<PropertyImage>().in("property_id", propertyIds));
+
+            favoriteMapper.delete(new QueryWrapper<Favorite>().in("property_id", propertyIds));
+
+            commentMapper.delete(new QueryWrapper<Comment>().in("property_id", propertyIds));
+
+            propertyMapper.deleteBatchIds(propertyIds);
+        }
+
+        favoriteMapper.delete(new QueryWrapper<Favorite>().eq("user_id", userId));
+
         return userMapper.deleteById(userId) > 0;
     }
 
     @Override
+    @Transactional  // Ensures all operations succeed or fail together
     public boolean removeUsersByIds(List<Long> userIds) {
+
+        commentMapper.delete(new QueryWrapper<Comment>().in("user_id", userIds));
+
+        List<Long> propertyIds = propertyMapper.selectList(
+                new QueryWrapper<Property>().in("seller_id", userIds)
+        ).stream().map(Property::getId).collect(Collectors.toList());
+
+        if (!propertyIds.isEmpty()) {
+            propertyImageMapper.delete(new QueryWrapper<PropertyImage>().in("property_id", propertyIds));
+
+            favoriteMapper.delete(new QueryWrapper<Favorite>().in("property_id", propertyIds));
+
+            commentMapper.delete(new QueryWrapper<Comment>().in("property_id", propertyIds));
+
+            propertyMapper.deleteBatchIds(propertyIds);
+        }
+
+        favoriteMapper.delete(new QueryWrapper<Favorite>().in("user_id", userIds));
+
         return userMapper.deleteBatchIds(userIds) > 0;
     }
 
