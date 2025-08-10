@@ -82,14 +82,14 @@ CREATE TABLE IF NOT EXISTS favorite (
     UNIQUE KEY unique_user_property (user_id, property_id) COMMENT '用户和房源的唯一约束'
 ) COMMENT '用户收藏表';
 
-INSERT INTO comment (property_id, rating, content, created_at) VALUES
-                                                                   (1, 5, 'Excellent property, very spacious and well maintained!', NOW() - INTERVAL 10 DAY),
-                                                                   (2, 4, 'Good location and reasonable price, but a bit noisy.', NOW() - INTERVAL 7 DAY),
-                                                                   (3, 3, 'Average experience, some issues with the plumbing.', NOW() - INTERVAL 3 DAY),
-                                                                   (4, 2, 'Not satisfied with the management, needs improvement.', NOW() - INTERVAL 2 HOUR),
-                                                                   (5, 1, 'Poor condition, would not recommend this property.', NOW() - INTERVAL 30 MINUTE),
-                                                                    (6, 5, 'Spacious layout with modern design, highly recommended!', NOW() - INTERVAL 14 DAY),
-                                                                    (7, 4, 'Nice view and good neighborhood, but a bit old.', NOW() - INTERVAL 9 DAY),
-                                                                    (8, 3, 'Fair deal for the price, but lacks nearby amenities.', NOW() - INTERVAL 5 DAY),
-                                                                    (9, 2, 'Had issues with the water supply during the visit.', NOW() - INTERVAL 1 DAY),
-                                                                    (10, 1, 'Very poor maintenance and cleanliness, disappointing.', NOW() - INTERVAL 1 HOUR);
+INSERT INTO comment (property_id, user_id, rating, content, created_at) VALUES
+                                                                            (1, 2, 5, 'Excellent property, very spacious and well maintained!', NOW() - INTERVAL 10 DAY),
+                                                                            (2, 3, 4, 'Good location and reasonable price, but a bit noisy.', NOW() - INTERVAL 7 DAY),
+                                                                            (3, 2, 3, 'Average experience, some issues with the plumbing.', NOW() - INTERVAL 3 DAY),
+                                                                            (4, 3, 2, 'Not satisfied with the management, needs improvement.', NOW() - INTERVAL 2 HOUR),
+                                                                            (5, 2, 1, 'Poor condition, would not recommend this property.', NOW() - INTERVAL 30 MINUTE),
+                                                                            (6, 3, 5, 'Spacious layout with modern design, highly recommended!', NOW() - INTERVAL 14 DAY),
+                                                                            (7, 2, 4, 'Nice view and good neighborhood, but a bit old.', NOW() - INTERVAL 9 DAY),
+                                                                            (8, 3, 3, 'Fair deal for the price, but lacks nearby amenities.', NOW() - INTERVAL 5 DAY),
+                                                                            (9, 2, 2, 'Had issues with the water supply during the visit.', NOW() - INTERVAL 1 DAY),
+                                                                            (10, 3, 1, 'Very poor maintenance and cleanliness, disappointing.', NOW() - INTERVAL 1 HOUR);

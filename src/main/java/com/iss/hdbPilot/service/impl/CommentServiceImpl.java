@@ -119,6 +119,38 @@ public class CommentServiceImpl implements CommentService {
         }
         return result;
     }
+    @Override
+    public List<Comment> searchComments(String search, int page, int size) {
+        QueryWrapper<Comment> query = new QueryWrapper<>();
+
+        // Add fuzzy search condition if a search term is provided
+        if (search != null && !search.trim().isEmpty()) {
+            query.like("content", search.trim());
+        }
+
+        // Order by creation time in descending order
+        query.orderByDesc("created_at");
+
+        // MyBatis-Plus pagination query
+        int offset = (page - 1) * size;
+        return commentMapper.selectList(
+                query.last("LIMIT " + offset + "," + size)
+        );
+    }
+
+    @Override
+    public long countSearchComments(String search) {
+        QueryWrapper<Comment> query = new QueryWrapper<>();
+
+        // Add fuzzy search condition if a search term is provided
+        if (search != null && !search.trim().isEmpty()) {
+            query.like("content", search.trim());
+        }
+
+        // Return the total count of matching comments
+        return commentMapper.selectCount(query);
+    }
+
 
 
 }
