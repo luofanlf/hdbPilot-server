@@ -1,19 +1,19 @@
 package com.iss.hdbPilot.controller;
 
+import com.iss.hdbPilot.common.BaseResponse;
 import com.iss.hdbPilot.model.dto.CommentRequest;
 import com.iss.hdbPilot.model.entity.Comment;
+import com.iss.hdbPilot.model.entity.User;
 import com.iss.hdbPilot.model.vo.CommentVO;
 import com.iss.hdbPilot.service.CommentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.iss.hdbPilot.model.entity.User;
-import com.iss.hdbPilot.common.BaseResponse;
-import javax.servlet.http.HttpServletRequest;
 
 
 @RestController
@@ -76,7 +76,7 @@ public class CommentController {
     }
     
     // get all comments
-    @GetMapping
+    @GetMapping("/all")
     public List<Comment> getAllComments() {
         return commentService.getAllComments();
     }
@@ -110,6 +110,20 @@ public class CommentController {
     @GetMapping("/property/{propertyId}/with-username")
     public List<CommentVO> getCommentVOsByProperty(@PathVariable Long propertyId) {
         return commentService.getCommentVOsByProperty(propertyId);
+    }
+    @GetMapping
+    public Map<String, Object> searchComments(
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) {
+        List<Comment> comments = commentService.searchComments(search, page, size);
+        long total = commentService.countSearchComments(search);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("data", comments);
+        result.put("total", total);
+        return result;
     }
 
 
