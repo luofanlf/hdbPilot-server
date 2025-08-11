@@ -297,7 +297,6 @@ public interface UserMapper extends BaseMapper<User> {
 ```
 
 ## 启动配置
-
 ### 环境要求
 - JDK 21
 - MySQL 8.0+
