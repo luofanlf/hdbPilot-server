@@ -295,7 +295,6 @@ public interface UserMapper extends BaseMapper<User> {
     // 可添加自定义查询方法
 }
 ```
-
 ## 启动配置
 ### 环境要求
 - JDK 21
