@@ -199,12 +199,15 @@ public class PropertyServiceImpl extends ServiceImpl<PropertyMapper, Property> i
             //加载卖家信息
             long sellerId = property.getSellerId();
             User seller = userMapper.selectById(sellerId);
-            if(seller == null){
-                throw new RuntimeException("seller not found");
-            }
+            // if(seller == null){
+            //     throw new RuntimeException("seller not found");
+            // }
+
             PropertyVO propertyVO = property.toVO();
-            propertyVO.setSellerName(seller.getUsername());
-            propertyVO.setSellerEmail(seller.getEmail());
+            if(seller != null){
+                propertyVO.setSellerName(seller.getUsername());
+                propertyVO.setSellerEmail(seller.getEmail());
+            }
             return propertyVO;
         }
         return null;
