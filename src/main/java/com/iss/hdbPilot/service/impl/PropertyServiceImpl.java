@@ -22,8 +22,10 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.iss.hdbPilot.mapper.PropertyImageMapper;
 import com.iss.hdbPilot.mapper.PropertyMapper;
+import com.iss.hdbPilot.mapper.UserMapper;
 import com.iss.hdbPilot.model.entity.Property;
 import com.iss.hdbPilot.model.entity.PropertyImage;
+import com.iss.hdbPilot.model.entity.User;
 import com.iss.hdbPilot.model.vo.PropertyVO;
 import com.iss.hdbPilot.service.PropertyService;
 
@@ -41,6 +43,8 @@ public class PropertyServiceImpl extends ServiceImpl<PropertyMapper, Property> i
     private PropertyMapper propertyMapper;
     @Autowired
     private PropertyImageMapper propertyImageMapper;
+    @Autowired
+    private UserMapper userMapper;
 
     @Override
     public Page<PropertyVO> list(PageRequest pageRequest) {
@@ -53,6 +57,7 @@ public class PropertyServiceImpl extends ServiceImpl<PropertyMapper, Property> i
         // 构造查询条件
         LambdaQueryWrapper<Property> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Property::getStatus, "available");
+       
 
         // 执行分页查询
         Page<Property> result = propertyMapper.selectPage(propertyPage, wrapper);
@@ -190,7 +195,17 @@ public class PropertyServiceImpl extends ServiceImpl<PropertyMapper, Property> i
             // 加载图片信息
             List<PropertyImage> images = getPropertyImageEntities(property.getId());
             property.setImageList(images);
-            return property.toVO();
+
+            //加载卖家信息
+            long sellerId = property.getSellerId();
+            User seller = userMapper.selectById(sellerId);
+            if(seller == null){
+                throw new RuntimeException("seller not found");
+            }
+            PropertyVO propertyVO = property.toVO();
+            propertyVO.setSellerName(seller.getUsername());
+            propertyVO.setSellerEmail(seller.getEmail());
+            return propertyVO;
         }
         return null;
     }

@@ -86,6 +86,10 @@ public class PropertyVO {
      */
     private String status;
 
+    private String sellerName;
+
+    private String sellerEmail;
+
     /**
      * 创建时间
      */
