@@ -57,6 +57,7 @@ public class PropertyServiceImpl extends ServiceImpl<PropertyMapper, Property> i
         // 构造查询条件
         LambdaQueryWrapper<Property> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Property::getStatus, "available");
+        wrapper.orderByDesc(Property::getCreatedAt);
        
 
         // 执行分页查询
@@ -81,6 +82,7 @@ public class PropertyServiceImpl extends ServiceImpl<PropertyMapper, Property> i
     public List<PropertyVO> listAll() {
         QueryWrapper<Property> wrapper = new QueryWrapper<>();
         wrapper.eq("status", "available");
+        
         List<Property> properties = propertyMapper.selectList(wrapper);
         
         // 为每个房源加载图片信息
