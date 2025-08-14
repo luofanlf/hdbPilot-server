@@ -195,7 +195,7 @@ class UserServiceImplTest {
         });
 
         // When
-        Long userId = userService.register("newuser", "password123", "password123");
+        Long userId = userService.register("newuser", "password123", "password123","123@qq.com");
 
         // Then
         assertEquals(1L, userId);
@@ -210,7 +210,7 @@ class UserServiceImplTest {
     void testRegister_NullUsername() {
         // When & Then
         RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> userService.register(null, "password123", "password123"));
+                () -> userService.register(null, "password123", "password123","123@qq.com"));
         assertEquals("Username and password cannot be null", exception.getMessage());
     }
 
@@ -218,7 +218,7 @@ class UserServiceImplTest {
     void testRegister_NullPassword() {
         // When & Then
         RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> userService.register("newuser", null, "password123"));
+                () -> userService.register("newuser", null, "password123","123@qq.com"));
         assertEquals("Username and password cannot be null", exception.getMessage());
     }
 
@@ -226,7 +226,7 @@ class UserServiceImplTest {
     void testRegister_NullConfirmPassword() {
         // When & Then
         RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> userService.register("newuser", "password123", null));
+                () -> userService.register("newuser", "password123", null,"123@qq.com"));
         assertEquals("Username and password cannot be null", exception.getMessage());
     }
 
@@ -234,7 +234,7 @@ class UserServiceImplTest {
     void testRegister_UsernameTooShort() {
         // When & Then
         RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> userService.register("usr", "password123", "password123"));
+                () -> userService.register("usr", "password123", "password123","123@qq.com"));
         assertEquals("Username must be between 4 and 16 characters long", exception.getMessage());
     }
 
@@ -242,7 +242,7 @@ class UserServiceImplTest {
     void testRegister_UsernameTooLong() {
         // When & Then
         RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> userService.register("verylongusernamethatistoolong", "password123", "password123"));
+                () -> userService.register("verylongusernamethatistoolong", "password123", "password123","123@qq.com"));
         assertEquals("Username must be between 4 and 16 characters long", exception.getMessage());
     }
 
@@ -250,7 +250,7 @@ class UserServiceImplTest {
     void testRegister_PasswordTooShort() {
         // When & Then
         RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> userService.register("newuser", "short", "short"));
+                () -> userService.register("newuser", "short", "short","123@qq.com"));
         assertEquals("Password must be at least 8 characters long", exception.getMessage());
     }
 
@@ -258,7 +258,7 @@ class UserServiceImplTest {
     void testRegister_PasswordsDoNotMatch() {
         // When & Then
         RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> userService.register("newuser", "password123", "password456"));
+                () -> userService.register("newuser", "password123", "password456","123@qq.com"));
         assertEquals("Passwords do not match", exception.getMessage());
     }
 
@@ -269,7 +269,7 @@ class UserServiceImplTest {
 
         // When & Then
         RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> userService.register("existinguser", "password123", "password123"));
+                () -> userService.register("existinguser", "password123", "password123","123@qq.com"));
         assertEquals("Username already exists", exception.getMessage());
     }
 

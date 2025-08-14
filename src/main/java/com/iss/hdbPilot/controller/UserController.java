@@ -41,9 +41,10 @@ public class UserController {
             throw new RuntimeException("Request body is null");
         }
         String username = userRegisterRequest.getUsername();
+        String email= userRegisterRequest.getEmail();
         String password = userRegisterRequest.getPassword();
         String confirmPassword = userRegisterRequest.getConfirmPassword();
-        return ResultUtils.success(userService.register(username,password,confirmPassword));
+        return ResultUtils.success(userService.register(username,password,confirmPassword,email));
     }
 
     // 保持原样，不作修改
