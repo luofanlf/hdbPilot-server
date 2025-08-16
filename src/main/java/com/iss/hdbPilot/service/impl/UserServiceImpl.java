@@ -96,7 +96,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public Long register(String username,String password,String confirmPassword){
+    public Long register(String username,String password,String confirmPassword,String email){
     
         //校验注册参数
         if(username == null || password == null || confirmPassword == null){
@@ -127,6 +127,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User user = new User();
         user.setUsername(username);
         user.setPasswordHash(encryptedPassword);
+        user.setEmail(email);
         user.setUserRole("user");
         userMapper.insert(user);
 

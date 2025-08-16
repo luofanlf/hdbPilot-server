@@ -40,7 +40,7 @@ public interface UserService {
      * @param confirmPassword
      * @return
      */
-    Long register(String username,String password,String confirmPassword);
+    Long register(String username,String password,String confirmPassword,String email);
 
     /**
      * 获取加密后的密码
